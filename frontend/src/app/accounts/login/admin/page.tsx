@@ -10,8 +10,8 @@ export default function LoginAdmin() {
         <div className="w-1/2 h-screen hidden lg:block">
           <Image
             src="/bg1.jpg"
-            width={1000}
-            height={1000}
+            width={9999}
+            height={9999}
             alt="Placeholder Image"
             className="object-cover w-full h-full"
           />

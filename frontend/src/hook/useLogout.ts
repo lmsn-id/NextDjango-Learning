@@ -12,7 +12,9 @@ export const useLogoutAdmin = () => {
         throw new Error("No refresh token found");
       }
 
-      const response = await fetch("http://localhost:8000/api/auth/logout/", {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/logout/`;
+
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

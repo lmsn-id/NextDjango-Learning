@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { api } from "./api";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
@@ -32,15 +31,14 @@ export const AddAkunSiswa = () => {
     }
 
     try {
-      const { ApiBackend } = api();
-      const addSiswaURL = ApiBackend("api/auth/addSiswa");
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/addSiswa/`;
 
       const session = await getSession();
       if (!session?.accessToken) {
         throw new Error("Session invalid or missing access token");
       }
 
-      const response = await fetch(addSiswaURL, {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

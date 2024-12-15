@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { api } from "@/hook/api";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -12,20 +11,18 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         try {
-          const { ApiBackend } = api();
-
           const pathname = req.headers?.referer || "";
           let loginPath;
 
           if (pathname.includes("/accounts/login/admin")) {
-            loginPath = "api/auth/login/admin";
+            loginPath = "login/admin";
           } else if (pathname.includes("/accounts/login/siswa")) {
-            loginPath = "api/auth/login/siswa";
+            loginPath = "login/siswa";
           } else {
             throw new Error("Invalid login path");
           }
 
-          const LoginURL = ApiBackend(loginPath);
+          const LoginURL = `${process.env.NEXT_PUBLIC_API_URL}/${loginPath}`;
 
           const response = await fetch(LoginURL, {
             method: "POST",
@@ -91,6 +88,7 @@ export const authOptions: NextAuthOptions = {
       }
 
       const currentTime = Math.floor(Date.now() / 1000);
+
       if (typeof token.exp === "number" && token.exp - currentTime < 5 * 60) {
         if (typeof token.refresh === "string" && token.refresh.length > 0) {
           try {
@@ -125,6 +123,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+
   pages: {
     signIn: "/accounts/login/admin",
     error: "/api/auth/error",
@@ -138,8 +137,7 @@ export const authOptions: NextAuthOptions = {
 };
 
 async function refreshAccessToken(refreshToken: string) {
-  const { ApiBackend } = api();
-  const RefreshURL = ApiBackend("api/auth/refresh");
+  const RefreshURL = `${process.env.NEXT_PUBLIC_API_URL}/refresh/`;
 
   try {
     const response = await fetch(RefreshURL, {
@@ -161,8 +159,7 @@ async function refreshAccessToken(refreshToken: string) {
 }
 
 export async function signOutFromBackend(refreshToken: string) {
-  const { ApiBackend } = api();
-  const LogoutURL = ApiBackend("api/auth/logout/");
+  const LogoutURL = `${process.env.NEXT_PUBLIC_API_URL}/logout/`;
 
   try {
     const response = await fetch(LogoutURL, {

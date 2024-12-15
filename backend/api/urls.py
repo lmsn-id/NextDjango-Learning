@@ -7,6 +7,10 @@ urlpatterns = [
     path('auth/refresh/', views.TokenRefreshView.as_view(), name='refresh'),
     path('auth/logout/', views.LogoutView.as_view(), name='logout'),
 #=====================================================================================
-    path('auth/addSiswa', views.AddSiswaView.as_view(), name='addSiswa'),
-    path('auth/GetdataSiswa', views.GetDataSiswaView.as_view(), name='dataSiswa'),
+    path('auth/addSiswa/', views.AddSiswaView.as_view(), name='addSiswa'),
+    path('auth/GetAlldataSiswa', views.GetAllDataSiswaView.as_view(), name='dataSiswa'),
+    path('auth/UpdateSiswa/<str:Nis>', views.UpdateSiswaView.as_view(), name='getSiswa'),
+    path('auth/deleteSiswa/<str:Nis>/', views.DeleteSiswaView.as_view(), name='delete-siswa'),
+   
+
 ]

@@ -174,8 +174,8 @@ export default function Navbar() {
                   </button>
                   {openDropdown && (
                     <div
-                      ref={dropdownRef}
                       className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white rounded shadow-md z-50"
+                      ref={dropdownRef}
                     >
                       <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45 shadow-md"></div>
 
@@ -250,11 +250,11 @@ export default function Navbar() {
                       </button>
                       {openDropdown && (
                         <div
+                          className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white rounded shadow-md"
                           ref={dropdownRef}
-                          className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white rounded shadow-md z-50"
                         >
                           <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45 shadow-md"></div>
-                          <div className="flex flex-col">
+                          <div className="flex flex-col z-40">
                             <Link
                               href="/accounts/login/admin"
                               className="block py-2 px-3 text-black rounded hover:bg-gray-100"

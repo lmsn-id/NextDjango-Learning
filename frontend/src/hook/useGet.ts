@@ -1,9 +1,8 @@
-// src/hook/useGetDataSiswa.ts
 import { useState, useEffect } from "react";
 import { getSession } from "next-auth/react";
-import { api } from "@/hook/api";
 
 interface Siswa {
+  id: string;
   Nama: string;
   Nis: string;
   Jurusan: string;
@@ -18,6 +17,7 @@ export const useGetDataSiswa = () => {
   const [kelas, setKelas] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(38);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchWithAuth = async (endpoint: string) => {
     const session = await getSession();
@@ -26,8 +26,8 @@ export const useGetDataSiswa = () => {
         "User is not authenticated or session is missing accessToken"
       );
     }
-    const { ApiBackend } = api();
-    const url = ApiBackend(endpoint);
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/${endpoint}`;
     const response = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export const useGetDataSiswa = () => {
       try {
         if (jurusanList.length === 0 || kelasList.length === 0) {
           const { jurusan, kelas } = await fetchWithAuth(
-            "api/auth/GetdataSiswa?unique=true"
+            "GetAlldataSiswa?unique=true"
           );
 
           const sortedJurusan = jurusan.sort((a: string, b: string) =>
@@ -72,7 +72,7 @@ export const useGetDataSiswa = () => {
         }
 
         const siswaData = await fetchWithAuth(
-          `api/auth/GetdataSiswa?jurusan=${jurusan}&kelas=${kelas}`
+          `GetAlldataSiswa?jurusan=${jurusan}&kelas=${kelas}`
         );
 
         const sortedSiswaData = siswaData.sort(
@@ -109,7 +109,7 @@ export const useGetDataSiswa = () => {
     }
 
     fetchData();
-  }, [jurusan, kelas, jurusanList.length, kelasList.length]);
+  }, [jurusan, kelas, jurusanList.length, kelasList.length, refreshKey]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -130,5 +130,6 @@ export const useGetDataSiswa = () => {
     setCurrentPage,
     currentItems,
     totalPages,
+    setRefreshKey,
   };
 };

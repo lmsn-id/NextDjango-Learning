@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import make_password
+from .models import DataSiswa
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,8 +9,9 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from datetime import datetime
 from .serializers import DataSiswaSerializer, UserSiswaSerializer
-from .models import DataSiswa
 
+
+#=================================================Login=================================================
 class LoginViewAdmin(APIView):
     permission_classes = [AllowAny]
 
@@ -93,31 +95,33 @@ class LogoutView(APIView):
             return Response({'error': str(e)}, status=400)
 
 
+#=================================================Login=================================================
 
+
+#=================================================Token=================================================
 class TokenRefreshView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         refresh_token = request.data.get('refresh')
 
+        if not refresh_token:
+            return Response({'error': 'Refresh token tidak diberikan.'}, status=400)
+
         try:
             refresh = RefreshToken(refresh_token)
-            current_time = datetime.now()
-
-            last_active_time = request.session.get('last_active_time')
-            if last_active_time:
-                last_active_time = datetime.fromisoformat(last_active_time)
-                if (current_time - last_active_time).total_seconds() > 15 * 60:
-                    return Response({'error': 'User inactive. Please log in again.'}, status=403)
-
             new_access = refresh.access_token
 
+            current_time = datetime.now()
             request.session['last_active_time'] = current_time.isoformat()
 
             return Response({'access': str(new_access), 'refresh': str(refresh)})
         except TokenError as e:
             return Response({'error': str(e)}, status=400)
 
+#=================================================Token=================================================
+
+#=================================================Siswa=================================================
 
 class AddSiswaView(APIView):
     def post(self, request):
@@ -176,7 +180,7 @@ class AddSiswaView(APIView):
             print("Exception error:", e)
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-class GetDataSiswaView(APIView):
+class GetAllDataSiswaView(APIView):
     def get(self, request):
         sort_by_jurusan = request.query_params.get('jurusan', None)
         sort_by_kelas = request.query_params.get('kelas', None)
@@ -204,3 +208,90 @@ class GetDataSiswaView(APIView):
 
         serializer = DataSiswaSerializer(siswa_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class UpdateSiswaView(APIView):
+    def get(self, request, Nis):
+        try:
+            siswa = DataSiswa.objects.filter(Nis=Nis).first()
+            if not siswa:
+                return Response({
+                    'error': 'not_found',
+                    'message': 'Data siswa tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = DataSiswaSerializer(siswa)
+            return Response({
+                'message': 'Data siswa ditemukan',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat mengambil data siswa',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, Nis):
+        try:
+            siswa = DataSiswa.objects.filter(Nis=Nis).first()
+            if not siswa:
+                return Response({
+                    'error': 'not_found',
+                    'message': 'Data siswa tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = DataSiswaSerializer(siswa, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'message': 'Data siswa berhasil diperbarui',
+                    'redirect': '/admin/akun/siswa',
+                    'data': serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'error': 'validation_error',
+                    'message': 'Data tidak valid',
+                    'details': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat memperbarui data siswa',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DeleteSiswaView(APIView):
+    def delete(self, request, Nis):
+        try:
+            siswa = DataSiswa.objects.filter(Nis=Nis).first()
+            if siswa:
+                siswa.delete()
+            else:
+                return Response({
+                    'error': 'Data siswa tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            user = User.objects.filter(username=Nis).first()
+            if user:
+                user.delete()
+            else:
+                return Response({
+                    'error': 'User tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            return Response({
+                'message': 'Data siswa berhasil dihapus'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print("Error during delete:", e)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+#=================================================Siswa=================================================
+
+#=================================================Guru==================================================
