@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
+import { toast } from "react-toastify";
 
-interface Siswa {
+interface SiswaAdmin {
   id: string;
   Nama: string;
   Nis: string;
@@ -10,7 +11,7 @@ interface Siswa {
 }
 
 export const useGetDataSiswa = () => {
-  const [siswaData, setSiswaData] = useState<Siswa[]>([]);
+  const [siswaData, setSiswaData] = useState<SiswaAdmin[]>([]);
   const [jurusanList, setJurusanList] = useState<string[]>([]);
   const [kelasList, setKelasList] = useState<string[]>([]);
   const [jurusan, setJurusan] = useState("");
@@ -131,5 +132,56 @@ export const useGetDataSiswa = () => {
     currentItems,
     totalPages,
     setRefreshKey,
+  };
+};
+
+export const useGetDataLearning = () => {
+  const [FormSiswa, setFormSiswa] = useState({
+    Nis: "",
+    Nama: "",
+    Jurusan: "",
+    Kelas: "",
+  });
+
+  const { data: session } = useSession();
+  const username = session?.user?.username;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!username) return;
+
+      try {
+        const session = await getSession();
+
+        if (!session || !session.accessToken) {
+          throw new Error(
+            "User is not authenticated or session is missing accessToken"
+          );
+        }
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/GetDataElearning/${username}`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setFormSiswa(result.data);
+        } else {
+          toast.error("Error fetching data");
+        }
+      } catch {
+        toast.error("Error fetching data");
+      }
+    };
+
+    fetchData();
+  }, [username]);
+
+  return {
+    FormSiswa,
   };
 };

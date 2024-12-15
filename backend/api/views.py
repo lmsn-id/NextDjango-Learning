@@ -294,4 +294,29 @@ class DeleteSiswaView(APIView):
 
 #=================================================Siswa=================================================
 
-#=================================================Guru==================================================
+#===============================================ELearning===============================================
+
+class GetAllDataElearningView(APIView):
+    def get(self, request, username):
+        try:
+            siswa = DataSiswa.objects.filter(Nis=username).first()
+            if not siswa:
+                return Response({
+                    'error': 'not_found',
+                    'message': 'Data siswa tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = DataSiswaSerializer(siswa)
+            return Response({
+                'message': 'Data siswa ditemukan',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat mengambil data siswa',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

@@ -9,6 +9,7 @@ import { IoLibraryOutline } from "react-icons/io5";
 import ComponentIcon from "@/hook/icon";
 import { usePathname } from "next/navigation";
 import LogoutButton from "../LogoutButton";
+import { useGetDataLearning } from "@/hook/useGet";
 
 export default function SidebarSiswa({
   children,
@@ -16,32 +17,17 @@ export default function SidebarSiswa({
   children: React.ReactNode;
 }) {
   const baseurl = () => "/e-learning";
+
   const { MdOutlineDashboard } = ComponentIcon.md;
   const { HiMenuAlt3 } = ComponentIcon.hi;
   const { RiSettings4Line } = ComponentIcon.ri;
   const { TbReportAnalytics } = ComponentIcon.tb;
   const pathname = usePathname();
+  const { FormSiswa } = useGetDataLearning();
 
   const [open, setOpen] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const menus = [
-    { name: "Dashboard", link: `${baseurl()}/`, icon: MdOutlineDashboard },
-    {
-      name: "Biodata",
-      link: `${baseurl()}/biodata`,
-      icon: BsFillSuitcaseLgFill,
-    },
-    { name: "Rapot", link: `${baseurl()}/rapot`, icon: TbReportAnalytics },
-    {
-      name: "Materi & Tugas",
-      link: `${baseurl()}/materi-tugas`,
-      icon: IoLibraryOutline,
-      margin: true,
-    },
-    { name: "Setting", link: `${baseurl()}/setting`, icon: RiSettings4Line },
-  ];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -66,6 +52,23 @@ export default function SidebarSiswa({
     }
     return path === pathname;
   };
+
+  const menus = [
+    { name: "Dashboard", link: `${baseurl()}/`, icon: MdOutlineDashboard },
+    {
+      name: "Biodata",
+      link: `${baseurl()}/biodata`,
+      icon: BsFillSuitcaseLgFill,
+    },
+    { name: "Rapot", link: `${baseurl()}/rapot`, icon: TbReportAnalytics },
+    {
+      name: "Materi & Tugas",
+      link: `${baseurl()}/materi-tugas`,
+      icon: IoLibraryOutline,
+      margin: true,
+    },
+    { name: "Setting", link: `${baseurl()}/setting`, icon: RiSettings4Line },
+  ];
 
   return (
     <main className="flex relative m-0 font-sans antialiased font-normal text-lg leading-default bg-gray-200 text-slate-500 h-screen overflow-hidden">
@@ -108,7 +111,7 @@ export default function SidebarSiswa({
                   : "hover:bg-gray-300"
               }`}
             >
-              <div>{React.createElement(menu.icon, { size: "20" })}</div>
+              <div className="w-5 h-5">{React.createElement(menu.icon)}</div>
               <h2
                 style={{ transitionDelay: `${i + 3}00ms` }}
                 className={`whitespace-pre duration-500 ${
@@ -141,8 +144,11 @@ export default function SidebarSiswa({
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                 >
                   <div>
-                    <h4 className="font-semibold">ariel</h4>
-                    <p className="text-xs">tkj 1</p>
+                    <h4 className="font-semibold">{FormSiswa.Nama}</h4>
+                    <div className="flex gap-1">
+                      <p className="text-xs">{FormSiswa.Kelas}</p>
+                      <p className="text-xs">{FormSiswa.Jurusan}</p>
+                    </div>
                   </div>
                   <IoIosArrowForward
                     className={`${
@@ -179,10 +185,9 @@ export default function SidebarSiswa({
               </li>
               <li className="text-lg font-semibold">
                 <HiMenuAlt3
-                  size={open ? 26 : 26}
                   className={`cursor-pointer transition-all duration-500 ${
-                    !open && "text-3xl"
-                  }`}
+                    open ? "text-2xl" : "text-xl"
+                  } `}
                   onClick={() => setOpen(!open)}
                 />
               </li>

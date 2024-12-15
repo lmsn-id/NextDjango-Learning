@@ -14,7 +14,12 @@ export default async function elearningLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "siswa" || !session.accessToken) {
+  if (
+    !session ||
+    session.user.role !== "siswa" ||
+    !session.accessToken ||
+    !session.user.username
+  ) {
     redirect("/404");
   }
 

@@ -83,6 +83,7 @@ export const authOptions: NextAuthOptions = {
         token.is_superuser = user.is_superuser || false;
         token.role = user.role;
         token.redirect = user.redirect;
+        token.username = user.username;
         token.message = user.message;
         token.exp = Date.now() / 1000 + 60 * 15;
       }
@@ -115,9 +116,9 @@ export const authOptions: NextAuthOptions = {
         ...session.user,
         is_superuser:
           typeof token.is_superuser === "boolean" ? token.is_superuser : false,
-        username: token.name || "",
         role: typeof token.role === "string" ? token.role : "",
         redirect: typeof token.redirect === "string" ? token.redirect : "",
+        username: typeof token.username === "string" ? token.username : "",
         message: typeof token.message === "string" ? token.message : "",
       };
       return session;
