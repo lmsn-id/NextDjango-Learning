@@ -136,7 +136,7 @@ export default function Navbar() {
               initial={{ transform: "translateY(-100%)", opacity: 0 }}
               animate={
                 isOpen
-                  ? { transform: "translateY(50%)", opacity: 1 }
+                  ? { transform: "translateY(40%)", opacity: 1 }
                   : { transform: "translateY(-100%)", opacity: 0 }
               }
               transition={{
@@ -165,43 +165,54 @@ export default function Navbar() {
                     Profile
                   </Link>
                 </li>
-                <li className="relative">
-                  <button
-                    onClick={buttonDropdown}
-                    className="flex w-full justify-center text-white rounded hover:text-black"
-                  >
-                    Login
-                  </button>
-                  {openDropdown && (
-                    <div
-                      className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white rounded shadow-md z-50"
-                      ref={dropdownRef}
-                    >
-                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45 shadow-md"></div>
-
-                      <div className="flex flex-col">
-                        <Link
-                          href="/accounts/login/admin"
-                          className="block py-2 px-3 text-black rounded hover:bg-gray-100"
-                        >
-                          Login Admin
-                        </Link>
-                        <Link
-                          href="/login/guru"
-                          className="block py-2 px-3 text-black rounded hover:bg-gray-100"
-                        >
-                          Login Guru
-                        </Link>
-                        <Link
-                          href="/accounts/login/siswa"
-                          className="block py-2 px-3 text-black rounded hover:bg-gray-100"
-                        >
-                          Login Siswa
-                        </Link>
+                {session ? (
+                  <>
+                    <ComponentPlus />
+                    <li>
+                      <div className="flex w-full justify-center text-white rounded hover:text-black">
+                        <LogoutButton />
                       </div>
-                    </div>
-                  )}
-                </li>
+                    </li>
+                  </>
+                ) : (
+                  <li className="relative">
+                    <button
+                      onClick={buttonDropdown}
+                      className="flex w-full justify-center text-white rounded hover:text-black"
+                    >
+                      Login
+                    </button>
+                    {openDropdown && (
+                      <div
+                        className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white rounded shadow-md z-50"
+                        ref={dropdownRef}
+                      >
+                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45 shadow-md"></div>
+
+                        <div className="flex flex-col">
+                          <Link
+                            href="/accounts/login/admin"
+                            className="block py-2 px-3 text-black rounded hover:bg-gray-100"
+                          >
+                            Login Admin
+                          </Link>
+                          <Link
+                            href="/accounts/login/guru"
+                            className="block py-2 px-3 text-black rounded hover:bg-gray-100"
+                          >
+                            Login Guru
+                          </Link>
+                          <Link
+                            href="/accounts/login/siswa"
+                            className="block py-2 px-3 text-black rounded hover:bg-gray-100"
+                          >
+                            Login Siswa
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                )}
               </ul>
             </motion.div>
           ) : (
@@ -262,7 +273,7 @@ export default function Navbar() {
                               Login Admin
                             </Link>
                             <Link
-                              href="/login/guru"
+                              href="/accounts/login/guru"
                               className="block py-2 px-3 text-black rounded hover:bg-gray-100"
                             >
                               Login Guru

@@ -10,6 +10,15 @@ interface SiswaAdmin {
   Kelas: string;
 }
 
+interface StrukturSekolah {
+  id: string;
+  Nuptk: string;
+  Nip: string;
+  Nama: string;
+  Posisi: string;
+  Kelas: string;
+}
+
 export const useGetDataSiswa = () => {
   const [siswaData, setSiswaData] = useState<SiswaAdmin[]>([]);
   const [jurusanList, setJurusanList] = useState<string[]>([]);
@@ -183,5 +192,68 @@ export const useGetDataLearning = () => {
 
   return {
     FormSiswa,
+  };
+};
+export const useGetDataSekolah = () => {
+  const [dataSekolah, setDataSekolah] = useState<StrukturSekolah[]>([]);
+  const [posisiList, setPosisiList] = useState<string[]>([]);
+  const [kelasList, setKelasList] = useState<string[]>([]);
+  const [posisi, setPosisi] = useState("");
+  const [kelas, setKelas] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const fetchWithAuth = async (endpoint: string) => {
+    const session = await getSession();
+    if (!session || !session.accessToken) {
+      throw new Error(
+        "User is not authenticated or session is missing accessToken"
+      );
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/${endpoint}`;
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    return await response.json();
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        if (posisiList.length === 0 || kelasList.length === 0) {
+          const { posisi, kelas } = await fetchWithAuth(
+            "GetAllStrukturSekolah?unique=true"
+          );
+          setPosisiList(posisi.sort());
+          setKelasList(kelas.sort());
+        }
+
+        const dataSekolah = await fetchWithAuth(
+          `GetAllStrukturSekolah?posisi=${posisi}&kelas=${kelas}`
+        );
+        setDataSekolah(dataSekolah);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    fetchData();
+  }, [posisi, kelas, posisiList.length, kelasList.length, refreshKey]);
+
+  return {
+    dataSekolah,
+    posisiList,
+    kelasList,
+    posisi,
+    kelas,
+    setPosisi,
+    setKelas,
+    setRefreshKey,
   };
 };

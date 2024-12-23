@@ -18,6 +18,8 @@ export default function NavbarAdmin() {
     "/admin/akun": "Akun",
     "/admin/akun/siswa": "Akun Siswa",
     "/admin/akun/siswa/add-siswa": "Add Siswa",
+    "/admin/akun/sekolah": "Akun Sekolah",
+    "/admin/akun/sekolah/add-akun": "Add Akun Sekolah",
   };
 
   const currentText = pathToTextMap[pathname as string] || "";

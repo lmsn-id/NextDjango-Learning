@@ -70,3 +70,96 @@ export const AddAkunSiswa = () => {
     handleSubmit,
   };
 };
+
+export const AddAkunStrukturSekolah = () => {
+  const router = useRouter();
+  const [posisi, setPosisi] = useState("");
+  const [materiList, setMateriList] = useState([""]);
+  const [FormData, setFormData] = useState({
+    Nuptk: "",
+    Nip: "",
+    Nama: "",
+    Posisi: "",
+    Kelas: "",
+    Materi: [],
+  });
+
+  const handleAddMateri = () => {
+    setMateriList([...materiList, ""]);
+  };
+
+  const handleMateriChange = (index: number, value: string) => {
+    const updatedMateriList = [...materiList];
+    updatedMateriList[index] = value;
+    setMateriList(updatedMateriList);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...FormData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const finalData = { ...FormData, Posisi: posisi, Materi: materiList };
+
+    if (!FormData.Nuptk && !FormData.Nip) {
+      toast.info("NUPTK Atau NIP tidak boleh kosong");
+      return;
+    }
+
+    if (!FormData.Nama || !finalData.Posisi) {
+      toast.info("Data tidak boleh kosong");
+      return;
+    }
+
+    if (posisi === "Guru" && materiList.some((materi) => !materi)) {
+      toast.info("Materi wajib diisi!");
+      return;
+    }
+
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/addSekolah/`;
+
+      const session = await getSession();
+      if (!session?.accessToken) {
+        throw new Error("Session invalid or missing access token");
+      }
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+        body: JSON.stringify(finalData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "Akun Sekolah Berhasil Ditambahkan", {
+          onClose: () => {
+            router.push(data.redirect);
+          },
+        });
+      } else {
+        toast.error(data.message || "Akun Sekolah Gagal Ditambahkan");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return {
+    FormData,
+    setFormData,
+    posisi,
+    setPosisi,
+    materiList,
+    setMateriList,
+    handleAddMateri,
+    handleMateriChange,
+    handleChange,
+    handleSubmit,
+  };
+};

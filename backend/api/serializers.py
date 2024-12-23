@@ -1,12 +1,12 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import DataSiswa
+from .models import DataSiswa, StrukturSekolah
 
-class UserSiswaSerializer(serializers.ModelSerializer):
+class AkunSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'password', 'first_name']
-
+        extra_kwargs = {'password': {'write_only': True}}
 
 class DataSiswaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,3 +27,31 @@ class DataSiswaSerializer(serializers.ModelSerializer):
         }
         
 
+
+class StrukturSekolahSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StrukturSekolah
+        fields = ['id','Nip', 'Nuptk', 'Nama', 'Posisi', 'Kelas', 'Materi']
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'Nip': {'required': False, 'allow_blank': True},  
+            'Nuptk': {'required': False, 'allow_blank': True},  
+            'Nama': {'required': True},  
+            'Posisi': {'required': True},  
+            'Kelas': {'required': False, 'allow_blank': True},  
+            'Materi': {'required': False, 'allow_null': True},  
+        }
+    def validate(self, data):
+        nip = data.get('Nip')
+        nuptk = data.get('Nuptk')
+        posisi = data.get('Posisi')
+        materi = data.get('Materi')
+        if not nip and not nuptk:
+            raise serializers.ValidationError("Salah satu dari Nip atau Nuptk harus diisi.")
+        if posisi == "Guru":
+            if not materi or not isinstance(materi, list):
+                raise serializers.ValidationError("Materi harus Wajib di isi.")
+        if posisi != "Guru":
+             data['Materi'] = []
+             data['Kelas'] = ""
+        return data

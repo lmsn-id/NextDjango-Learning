@@ -20,3 +20,24 @@ class DataSiswa(models.Model):
         if not self.id: 
             self.id = int(self.Nis)  
         super().save(*args, **kwargs)
+
+class StrukturSekolah(models.Model):
+    id = models.BigIntegerField( unique=True, blank=True, primary_key=True)
+    Nip = models.CharField( unique=True, blank=True, max_length=15)
+    Nuptk = models.CharField(max_length=15)
+    Nama = models.CharField(max_length=50)
+    JenisKelamin = models.CharField(max_length=15, null=True, blank=True)
+    TanggalLahir = models.DateField(null=True, blank=True)
+    TempatLahir = models.CharField(max_length=40, null=True, blank=True)
+    Agama = models.CharField(max_length=20, null=True, blank=True)
+    Alamat = models.TextField(null=True, blank=True)
+    NoTelepon = models.CharField(max_length=18, null=True, blank=True)
+    Posisi = models.CharField(max_length=20)
+    Kelas = models.CharField(max_length=20)
+    Materi = models.JSONField()
+    Tanggal_Masuk = models.DateField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.id = int(self.Nip) if self.Nip else int(self.Nuptk)
+        super().save(*args, **kwargs)

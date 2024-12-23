@@ -13,6 +13,10 @@ urlpatterns = [
     path('auth/deleteSiswa/<str:Nis>/', views.DeleteSiswaView.as_view(), name='delete-siswa'),
 #=====================================================================================
     path('auth/GetDataElearning/<str:username>', views.GetAllDataElearningView.as_view(), name='dataElearning'),
+#=====================================================================================
+    path('auth/addSekolah/', views.AddStrukturSekolahView.as_view(), name='addSekolah'),
+    path('auth/GetAllStrukturSekolah', views.GetAllStrukturSekolahView.as_view(), name='dataSekolah'),
+
    
 
 ]

@@ -1,5 +1,5 @@
 from django.contrib.auth.hashers import make_password
-from .models import DataSiswa
+from .models import DataSiswa, StrukturSekolah
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,7 +8,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth.models import User
 from datetime import datetime
-from .serializers import DataSiswaSerializer, UserSiswaSerializer
+from .serializers import AkunSerializer, DataSiswaSerializer, StrukturSekolahSerializer
+import traceback
+
 
 
 #=================================================Login=================================================
@@ -140,7 +142,7 @@ class AddSiswaView(APIView):
 
             default_password = make_password(nis)
 
-            user_serializer = UserSiswaSerializer(data={
+            user_serializer = AkunSerializer(data={
                 'username': nis,
                 'password': default_password,
                 'first_name': nama,
@@ -320,3 +322,108 @@ class GetAllDataElearningView(APIView):
                 'details': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+#===============================================Struktur Sekolah===============================================
+class AddStrukturSekolahView(APIView):
+    def post(self, request):
+        try:
+            nip = request.data.get('Nip')
+            nuptk = request.data.get('Nuptk')
+            nama = request.data.get('Nama')
+            posisi = request.data.get('Posisi')
+            kelas = request.data.get('Kelas', '')
+            materi = request.data.get('Materi', [])
+
+            username = nip if nip else nuptk
+
+            if not isinstance(materi, list):
+                materi = [materi] 
+            
+            if not nip:
+                return Response({
+                    'error': 'NIP Wajib diisi',
+                    'message': 'NIP Wajib diisi'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if User.objects.filter(username=username).exists():
+                return Response({
+                    'error': 'Username already exists',
+                    'message': 'NIP atau NUPTK sudah terdaftar sebagai username',
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            default_password = make_password(username)  
+            user_serializer = AkunSerializer(data={
+                'username': username,
+                'password': default_password,
+                'first_name': nama,
+            })
+
+            if user_serializer.is_valid():
+                user_serializer.save()
+            else:
+                return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            sekolah_serializer = StrukturSekolahSerializer(data={
+                'Nip': nip,
+                'Nuptk': nuptk,
+                'Nama': nama,
+                'Posisi': posisi,
+                'Kelas': kelas if posisi == "Guru" else "",
+                'Materi': materi if posisi == "Guru" else [],
+            })
+
+
+            if sekolah_serializer.is_valid():
+                sekolah_serializer.save()
+                return Response({
+                    'message': 'Data berhasil disimpan',
+                    'redirect': '/admin/akun/sekolah',
+                }, status=status.HTTP_201_CREATED)
+            else:
+                return Response(sekolah_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            traceback.print_exc() 
+            print("Exception error:", e)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class GetAllStrukturSekolahView(APIView):
+    def get(self, request):
+        sort_by_posisi = request.query_params.get('posisi', None)
+        sort_by_kelas = request.query_params.get('kelas', None)
+        get_unique = request.query_params.get('unique', 'false').lower() == 'true'
+
+        posisi_order = [
+            "Kepala Sekolah",
+            "Wakil Kepala Sekolah",
+            "Tata Usaha",
+            "Guru",
+            "Staf"
+        ]
+
+        if get_unique:
+            unique_posisi = StrukturSekolah.objects.values_list('Posisi', flat=True).distinct()
+            unique_kelas = StrukturSekolah.objects.values_list('Kelas', flat=True).distinct()
+            return Response(
+                {
+                    "posisi": list(unique_posisi),
+                    "kelas": list(unique_kelas),
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        queryset = StrukturSekolah.objects.all()
+
+        if sort_by_posisi:
+            queryset = queryset.filter(Posisi__icontains=sort_by_posisi).order_by('Posisi')
+
+        if sort_by_kelas:
+            queryset = queryset.filter(Kelas__icontains=sort_by_kelas).order_by('Kelas')
+
+        # Urutkan sesuai prioritas posisi
+        ordered_queryset = sorted(
+            queryset,
+            key=lambda x: posisi_order.index(x.Posisi) if x.Posisi in posisi_order else len(posisi_order)
+        )
+
+        serializer = StrukturSekolahSerializer(ordered_queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -6,7 +6,7 @@ import ComponentIcon from "@/hook/icon";
 import LogoutButton from "../LogoutButton";
 
 export default function SidebarAdmin() {
-  const { FaTv, FaUser, FaSignInAlt } = ComponentIcon.fa;
+  const { FaTv, FaUser, FaSignInAlt, FaUserTie } = ComponentIcon.fa;
   const { PiStudentFill } = ComponentIcon.pi;
   const { MdOutlineLastPage } = ComponentIcon.md;
   const pathname = usePathname();
@@ -104,7 +104,7 @@ export default function SidebarAdmin() {
                       <li className="mt-0.5 w-full">
                         <Link
                           className={`py-3 text-lg ease-nav-brand flex items-center whitespace-nowrap rounded-lg px-4 font-semibold transition-colors hover:bg-gray-300 ${
-                            isActive("/admin/tes")
+                            isActive("/admin/akun/siswa")
                               ? "bg-gray-300 text-white"
                               : "bg-blue-500/13 text-slate-700"
                           }`}
@@ -114,6 +114,21 @@ export default function SidebarAdmin() {
                             <PiStudentFill className="text-blue-500 text-xl" />
                           </div>
                           Akun Siswa
+                        </Link>
+                      </li>
+                      <li className="mt-0.5 w-full">
+                        <Link
+                          className={`py-3 text-lg ease-nav-brand flex items-center whitespace-nowrap rounded-lg px-4 font-semibold transition-colors hover:bg-gray-300 ${
+                            isActive("/admin/akun/sekolah")
+                              ? "bg-gray-300 text-white"
+                              : "bg-blue-500/13 text-slate-700"
+                          }`}
+                          href="/admin/akun/sekolah"
+                        >
+                          <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-center xl:p-2.5">
+                            <FaUserTie className="text-blue-500 text-xl" />
+                          </div>
+                          Akun Sekolah
                         </Link>
                       </li>
                     </ul>
