@@ -2,6 +2,9 @@
 import Link from "next/link";
 import { useGetDataSekolah } from "@/hook/useGet";
 import { usePathname, useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { getSession } from "next-auth/react";
+import Swal from "sweetalert2";
 
 export default function SekolahPage() {
   const {
@@ -12,6 +15,7 @@ export default function SekolahPage() {
     kelas,
     setPosisi,
     setKelas,
+    setRefreshKey,
   } = useGetDataSekolah();
 
   const GetPage = usePathname();
@@ -21,6 +25,54 @@ export default function SekolahPage() {
   const handleEditClick = async (id: string) => {
     const url = `${BaseUrl}/update/${id}`;
     router.push(url);
+  };
+
+  const handleDelete = async (id: string, Nama: string, Posisi: string) => {
+    const session = await getSession();
+    if (!session || !session.accessToken) {
+      throw new Error(
+        "User is not authenticated or session is missing accessToken"
+      );
+    }
+
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: `Apakah Anda yakin ingin menghapus Data ${Posisi} dengan Nama ${Nama}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/deleteDataSekolah/${id}/`;
+        const response = await fetch(url, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        });
+
+        const success = await response.json();
+
+        if (response.ok) {
+          toast.success(success.message, {
+            onClose: () => {
+              setRefreshKey((prevKey) => prevKey + 1);
+            },
+          });
+        } else {
+          toast.error("Gagal menghapus struktur sekolah.");
+        }
+      } catch (error) {
+        console.error("Error deleting struktur sekolah:", error);
+        toast.error("Gagal menghapus struktur sekolah.");
+      }
+    }
   };
 
   return (
@@ -120,7 +172,12 @@ export default function SekolahPage() {
                       {item.Posisi}
                     </td>
                     <td className="px-6 py-3 text-center font-semibold text-lg space-x-6">
-                      <button className="p-2 bg-red-500 text-white rounded-lg">
+                      <button
+                        onClick={() =>
+                          handleDelete(item.id, item.Nama, item.Posisi)
+                        }
+                        className="p-2 bg-red-500 text-white rounded-lg"
+                      >
                         Delete
                       </button>
                       <button

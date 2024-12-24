@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth.models import User
 from datetime import datetime
-from .serializers import AkunSerializer, DataSiswaSerializer, StrukturSekolahSerializer
+from .serializers import AkunSerializer, DataSiswaSerializer, GetAllDataSiswaSerializer, StrukturSekolahSerializer, GetAllStrukturSekolahSerializer
 import traceback
 
 
@@ -208,7 +208,7 @@ class GetAllDataSiswaView(APIView):
         if sort_by_kelas:
             siswa_queryset = siswa_queryset.filter(Kelas=sort_by_kelas).order_by('Kelas')
 
-        serializer = DataSiswaSerializer(siswa_queryset, many=True)
+        serializer = GetAllDataSiswaSerializer(siswa_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class UpdateSiswaView(APIView):
@@ -419,11 +419,109 @@ class GetAllStrukturSekolahView(APIView):
         if sort_by_kelas:
             queryset = queryset.filter(Kelas__icontains=sort_by_kelas).order_by('Kelas')
 
-        # Urutkan sesuai prioritas posisi
         ordered_queryset = sorted(
             queryset,
             key=lambda x: posisi_order.index(x.Posisi) if x.Posisi in posisi_order else len(posisi_order)
         )
 
-        serializer = StrukturSekolahSerializer(ordered_queryset, many=True)
+        serializer = GetAllStrukturSekolahSerializer(ordered_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class UpdateDataStrukturSekolahView(APIView):
+    def get(self, request, id):
+        try:
+            sekolah = StrukturSekolah.objects.filter(id=id).first()
+            if not sekolah:
+                return Response({
+                    'error': 'not_found',
+                    'message': 'Data sekolah tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = StrukturSekolahSerializer(sekolah)
+            return Response({
+                'message': 'Data sekolah ditemukan',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            traceback.print_exc() 
+            print("Exception error:", e)
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat mendapatkan data sekolah',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def put(self, request, id):
+        print("Received data:", request.data)
+        try:
+            materi = request.data.get('Materi', [])
+        
+            if not isinstance(materi, list):
+                materi = [materi] 
+            
+            sekolah = StrukturSekolah.objects.filter(id=id).first()
+            if not sekolah:
+                return Response({
+                    'error': 'not_found',
+                    'message': 'Data sekolah tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = StrukturSekolahSerializer(sekolah, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'message': 'Data sekolah berhasil diupdate',
+                    'redirect': '/admin/akun/sekolah',
+                    'data': serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                print("Serializer errors:", serializer.errors)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            traceback.print_exc() 
+            print("Exception error:", e)
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat memperbarui data sekolah',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DeleteDataStrukturSekolahView(APIView):
+    def delete(self, request, id):
+        try:
+
+            user = User.objects.filter(username=id).first()
+            if user:
+                user.delete()
+            else:
+                return Response({
+                    'error': 'User tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+
+            sekolah = StrukturSekolah.objects.filter(id=id).first()
+            if not sekolah:
+                return Response({
+                    'error': 'not_found',
+                    'message': 'Data sekolah tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            sekolah.delete()
+            return Response({
+                'message': 'Data sekolah berhasil dihapus',
+                'redirect': '/admin/akun/sekolah',
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            traceback.print_exc() 
+            print("Exception error:", e)
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat menghapus data sekolah',
+                'details': str(e)
+            })
+        
+        

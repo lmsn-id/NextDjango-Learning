@@ -16,6 +16,8 @@ urlpatterns = [
 #=====================================================================================
     path('auth/addSekolah/', views.AddStrukturSekolahView.as_view(), name='addSekolah'),
     path('auth/GetAllStrukturSekolah', views.GetAllStrukturSekolahView.as_view(), name='dataSekolah'),
+    path('auth/UpdateDataSekolah/<str:id>', views.UpdateDataStrukturSekolahView.as_view(), name='getSekolah'),
+    path('auth/deleteDataSekolah/<str:id>/', views.DeleteDataStrukturSekolahView.as_view(), name='delete-sekolah'),
 
    
 

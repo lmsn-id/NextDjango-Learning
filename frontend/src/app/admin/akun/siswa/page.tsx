@@ -5,6 +5,7 @@ import { useGetDataSiswa } from "@/hook/useGet";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { getSession } from "next-auth/react";
+import Swal from "sweetalert2";
 
 export default function SiswaPage() {
   const {
@@ -30,7 +31,7 @@ export default function SiswaPage() {
     router.push(url);
   };
 
-  const handleDelete = async (Nis: string) => {
+  const handleDelete = async (Nis: string, Nama: string) => {
     const session = await getSession();
     if (!session || !session.accessToken) {
       throw new Error(
@@ -38,11 +39,18 @@ export default function SiswaPage() {
       );
     }
 
-    if (
-      window.confirm(
-        `Apakah Anda yakin ingin menghapus siswa dengan NIS ${Nis}?`
-      )
-    ) {
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: `Apakah Anda yakin ingin menghapus Data Siswa dengan Nis ${Nis} Nama ${Nama}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
       try {
         const url = `${process.env.NEXT_PUBLIC_API_URL}/deleteSiswa/${Nis}/`;
         const response = await fetch(url, {
@@ -165,7 +173,7 @@ export default function SiswaPage() {
                   </td>
                   <td className="px-6 py-3 text-center font-semibold text-lg space-x-6">
                     <button
-                      onClick={() => handleDelete(siswa.Nis)}
+                      onClick={() => handleDelete(siswa.Nis, siswa.Nama)}
                       className="p-2 bg-red-500 text-white rounded-lg"
                     >
                       Hapus

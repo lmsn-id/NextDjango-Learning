@@ -2,6 +2,16 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
+import { useForm, useFieldArray } from "react-hook-form";
+
+interface FormValues {
+  Nuptk: string;
+  Nip: string;
+  Nama: string;
+  Posisi: string;
+  Kelas: string;
+  Materi: { id: string; value: string }[];
+}
 
 export const AddAkunSiswa = () => {
   const [FormData, setFormData] = useState({
@@ -73,51 +83,55 @@ export const AddAkunSiswa = () => {
 
 export const AddAkunStrukturSekolah = () => {
   const router = useRouter();
-  const [posisi, setPosisi] = useState("");
-  const [materiList, setMateriList] = useState([""]);
-  const [FormData, setFormData] = useState({
-    Nuptk: "",
-    Nip: "",
-    Nama: "",
-    Posisi: "",
-    Kelas: "",
-    Materi: [],
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
+    defaultValues: {
+      Nuptk: "",
+      Nip: "",
+      Nama: "",
+      Posisi: "",
+      Kelas: "",
+      Materi: [{ id: Date.now().toString(), value: "" }],
+    },
   });
 
-  const handleAddMateri = () => {
-    setMateriList([...materiList, ""]);
-  };
+  const { fields, append } = useFieldArray({
+    control,
+    name: "Materi",
+  });
 
-  const handleMateriChange = (index: number, value: string) => {
-    const updatedMateriList = [...materiList];
-    updatedMateriList[index] = value;
-    setMateriList(updatedMateriList);
-  };
+  const posisi = watch("Posisi");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...FormData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const finalData = { ...FormData, Posisi: posisi, Materi: materiList };
-
-    if (!FormData.Nuptk && !FormData.Nip) {
-      toast.info("NUPTK Atau NIP tidak boleh kosong");
+  const onSubmit = async (data: FormValues) => {
+    if (!data.Nuptk && !data.Nip) {
+      toast.info("NUPTK atau NIP tidak boleh kosong");
       return;
     }
 
-    if (!FormData.Nama || !finalData.Posisi) {
+    if (!data.Nama || !data.Posisi) {
       toast.info("Data tidak boleh kosong");
       return;
     }
 
-    if (posisi === "Guru" && materiList.some((materi) => !materi)) {
+    if (data.Posisi === "Guru" && data.Materi.some((materi) => !materi.value)) {
       toast.info("Materi wajib diisi!");
       return;
     }
 
     try {
+      const transformedMateri = data.Materi.map((materi) => materi.value);
+
+      const transformedData = {
+        ...data,
+        Materi: transformedMateri,
+      };
       const url = `${process.env.NEXT_PUBLIC_API_URL}/addSekolah/`;
 
       const session = await getSession();
@@ -131,35 +145,34 @@ export const AddAkunStrukturSekolah = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.accessToken}`,
         },
-        body: JSON.stringify(finalData),
+        body: JSON.stringify(transformedData),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || "Akun Sekolah Berhasil Ditambahkan", {
+        toast.success(result.message || "Akun Sekolah Berhasil Ditambahkan", {
           onClose: () => {
-            router.push(data.redirect);
+            router.push(result.redirect);
           },
         });
       } else {
-        toast.error(data.message || "Akun Sekolah Gagal Ditambahkan");
+        toast.error(result.message || "Akun Sekolah Gagal Ditambahkan");
       }
     } catch (error) {
       console.error(error);
+      toast.error("Terjadi kesalahan. Silakan coba lagi.");
     }
   };
 
   return {
-    FormData,
-    setFormData,
-    posisi,
-    setPosisi,
-    materiList,
-    setMateriList,
-    handleAddMateri,
-    handleMateriChange,
-    handleChange,
+    register,
     handleSubmit,
+    onSubmit,
+    reset,
+    errors,
+    fields,
+    append,
+    posisi,
   };
 };

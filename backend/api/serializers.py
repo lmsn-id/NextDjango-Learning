@@ -25,6 +25,11 @@ class DataSiswaSerializer(serializers.ModelSerializer):
             'Alamat': {'allow_null': True, 'required': False},
             'NoTelepon': {'allow_null': True, 'required': False},
         }
+
+class GetAllDataSiswaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DataSiswa
+        fields = '__all__'
         
 
 
@@ -54,4 +59,11 @@ class StrukturSekolahSerializer(serializers.ModelSerializer):
         if posisi != "Guru":
              data['Materi'] = []
              data['Kelas'] = ""
+        
+        
         return data
+
+class GetAllStrukturSekolahSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StrukturSekolah
+        fields = '__all__'

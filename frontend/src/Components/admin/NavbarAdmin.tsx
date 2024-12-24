@@ -20,6 +20,7 @@ export default function NavbarAdmin() {
     "/admin/akun/siswa/add-siswa": "Add Siswa",
     "/admin/akun/sekolah": "Akun Sekolah",
     "/admin/akun/sekolah/add-akun": "Add Akun Sekolah",
+    "/admin/akun/sekolah/update/[id]": "Update Akun Sekolah",
   };
 
   const currentText = pathToTextMap[pathname as string] || "";
