@@ -24,7 +24,7 @@ async function getDataSekolah(id: string) {
     );
   }
 
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/UpdateDataSekolah/${id}`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/UpdateDataAkademik/${id}`;
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -47,7 +47,7 @@ async function updateDataSekolah(id: string, data: SekolahFormData) {
     throw new Error("Unauthorized");
   }
 
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/UpdateDataSekolah/${id}`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/UpdateDataAkademik/${id}`;
   const response = await fetch(url, {
     method: "PUT",
     headers: {

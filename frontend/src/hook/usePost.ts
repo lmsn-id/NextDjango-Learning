@@ -81,7 +81,7 @@ export const AddAkunSiswa = () => {
   };
 };
 
-export const AddAkunStrukturSekolah = () => {
+export const AddDataAkademik = () => {
   const router = useRouter();
 
   const {
@@ -132,7 +132,7 @@ export const AddAkunStrukturSekolah = () => {
         ...data,
         Materi: transformedMateri,
       };
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/addSekolah/`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/AddDataAkademik/`;
 
       const session = await getSession();
       if (!session?.accessToken) {

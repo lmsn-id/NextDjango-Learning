@@ -194,7 +194,7 @@ export const useGetDataLearning = () => {
     FormSiswa,
   };
 };
-export const useGetDataSekolah = () => {
+export const useGetDataAkademik = () => {
   const [dataSekolah, setDataSekolah] = useState<StrukturSekolah[]>([]);
   const [posisiList, setPosisiList] = useState<string[]>([]);
   const [kelasList, setKelasList] = useState<string[]>([]);
@@ -228,14 +228,14 @@ export const useGetDataSekolah = () => {
       try {
         if (posisiList.length === 0 || kelasList.length === 0) {
           const { posisi, kelas } = await fetchWithAuth(
-            "GetAllStrukturSekolah?unique=true"
+            "GetAllDataAkademik?unique=true"
           );
           setPosisiList(posisi.sort());
           setKelasList(kelas.sort());
         }
 
         const dataSekolah = await fetchWithAuth(
-          `GetAllStrukturSekolah?posisi=${posisi}&kelas=${kelas}`
+          `GetAllDataAkademik?posisi=${posisi}&kelas=${kelas}`
         );
         setDataSekolah(dataSekolah);
       } catch (error) {

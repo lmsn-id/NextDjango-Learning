@@ -21,7 +21,7 @@ class DataSiswa(models.Model):
             self.id = int(self.Nis)  
         super().save(*args, **kwargs)
 
-class StrukturSekolah(models.Model):
+class Akademik(models.Model):
     id = models.BigIntegerField( unique=True, blank=True, primary_key=True)
     Nip = models.CharField( unique=True, blank=True, max_length=15)
     Nuptk = models.CharField(max_length=15)

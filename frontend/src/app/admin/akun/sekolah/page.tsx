@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useGetDataSekolah } from "@/hook/useGet";
+import { useGetDataAkademik } from "@/hook/useGet";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { getSession } from "next-auth/react";
@@ -16,7 +16,7 @@ export default function SekolahPage() {
     setPosisi,
     setKelas,
     setRefreshKey,
-  } = useGetDataSekolah();
+  } = useGetDataAkademik();
 
   const GetPage = usePathname();
   const BaseUrl = `${GetPage}`;
@@ -48,7 +48,7 @@ export default function SekolahPage() {
 
     if (result.isConfirmed) {
       try {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/deleteDataSekolah/${id}/`;
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/DeleteDataAkademik/${id}/`;
         const response = await fetch(url, {
           method: "DELETE",
           headers: {

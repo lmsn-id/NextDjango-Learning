@@ -1,5 +1,5 @@
 from django.contrib.auth.hashers import make_password
-from .models import DataSiswa, StrukturSekolah
+from .models import DataSiswa, Akademik
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth.models import User
 from datetime import datetime
-from .serializers import AkunSerializer, DataSiswaSerializer, GetAllDataSiswaSerializer, StrukturSekolahSerializer, GetAllStrukturSekolahSerializer
+from .serializers import AkunSerializer, DataSiswaSerializer, GetAllDataSiswaSerializer, AkademikSerializer, GetAllAkademikSerializer
 import traceback
 
 
@@ -76,6 +76,43 @@ class LoginViewSiswa(APIView):
             'redirect': '/e-learning',
             'message': "Login Berhasil",
         })
+    
+class LoginAkademikView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username or not password:
+            return Response({'error': 'Username dan password harus diisi'}, status=400)
+
+        user = User.objects.filter(username=username).first()
+
+        if not user:
+            return Response({'error': 'Akun Belum Terdaftar'}, status=401)
+
+        if not user.check_password(password):
+            return Response({'error': 'Kata Sandi Salah'}, status=401)
+
+        struktur_data = Akademik.objects.filter(id=username).first()
+        if not struktur_data:
+            return Response({'error': 'Data Struktur Sekolah tidak ditemukan'}, status=404)
+
+        refresh = RefreshToken.for_user(user)
+        request.session['last_login_date'] = datetime.now().date().isoformat()
+
+        return Response({
+            'id': struktur_data.id,
+            'username': user.username,
+            'email': user.email,
+            'access': str(refresh.access_token),  
+            'refresh': str(refresh),
+            'posisi': struktur_data.Posisi, 
+            'redirect': '/akademik',
+            'message': "Login Berhasil",
+        })
+
 
 
 class LogoutView(APIView):
@@ -321,9 +358,10 @@ class GetAllDataElearningView(APIView):
                 'message': 'Terjadi kesalahan saat mengambil data siswa',
                 'details': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
 #===============================================Struktur Sekolah===============================================
-class AddStrukturSekolahView(APIView):
+class AddDataAkademikView(APIView):
     def post(self, request):
         try:
             nip = request.data.get('Nip')
@@ -362,7 +400,7 @@ class AddStrukturSekolahView(APIView):
             else:
                 return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            sekolah_serializer = StrukturSekolahSerializer(data={
+            sekolah_serializer = AkademikSerializer(data={
                 'Nip': nip,
                 'Nuptk': nuptk,
                 'Nama': nama,
@@ -386,7 +424,7 @@ class AddStrukturSekolahView(APIView):
             print("Exception error:", e)
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-class GetAllStrukturSekolahView(APIView):
+class GetAllDataAkademikView(APIView):
     def get(self, request):
         sort_by_posisi = request.query_params.get('posisi', None)
         sort_by_kelas = request.query_params.get('kelas', None)
@@ -401,8 +439,8 @@ class GetAllStrukturSekolahView(APIView):
         ]
 
         if get_unique:
-            unique_posisi = StrukturSekolah.objects.values_list('Posisi', flat=True).distinct()
-            unique_kelas = StrukturSekolah.objects.values_list('Kelas', flat=True).distinct()
+            unique_posisi = Akademik.objects.values_list('Posisi', flat=True).distinct()
+            unique_kelas = Akademik.objects.values_list('Kelas', flat=True).distinct()
             return Response(
                 {
                     "posisi": list(unique_posisi),
@@ -411,7 +449,7 @@ class GetAllStrukturSekolahView(APIView):
                 status=status.HTTP_200_OK,
             )
 
-        queryset = StrukturSekolah.objects.all()
+        queryset = Akademik.objects.all()
 
         if sort_by_posisi:
             queryset = queryset.filter(Posisi__icontains=sort_by_posisi).order_by('Posisi')
@@ -424,20 +462,20 @@ class GetAllStrukturSekolahView(APIView):
             key=lambda x: posisi_order.index(x.Posisi) if x.Posisi in posisi_order else len(posisi_order)
         )
 
-        serializer = GetAllStrukturSekolahSerializer(ordered_queryset, many=True)
+        serializer = GetAllAkademikSerializer(ordered_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-class UpdateDataStrukturSekolahView(APIView):
+class UpdateDataAkademikView(APIView):
     def get(self, request, id):
         try:
-            sekolah = StrukturSekolah.objects.filter(id=id).first()
+            sekolah = Akademik.objects.filter(id=id).first()
             if not sekolah:
                 return Response({
                     'error': 'not_found',
                     'message': 'Data sekolah tidak ditemukan'
                 }, status=status.HTTP_404_NOT_FOUND)
 
-            serializer = StrukturSekolahSerializer(sekolah)
+            serializer = AkademikSerializer(sekolah)
             return Response({
                 'message': 'Data sekolah ditemukan',
                 'data': serializer.data
@@ -460,14 +498,14 @@ class UpdateDataStrukturSekolahView(APIView):
             if not isinstance(materi, list):
                 materi = [materi] 
             
-            sekolah = StrukturSekolah.objects.filter(id=id).first()
+            sekolah = Akademik.objects.filter(id=id).first()
             if not sekolah:
                 return Response({
                     'error': 'not_found',
                     'message': 'Data sekolah tidak ditemukan'
                 }, status=status.HTTP_404_NOT_FOUND)
 
-            serializer = StrukturSekolahSerializer(sekolah, data=request.data)
+            serializer = AkademikSerializer(sekolah, data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response({
@@ -489,7 +527,7 @@ class UpdateDataStrukturSekolahView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class DeleteDataStrukturSekolahView(APIView):
+class DeleteDataAkademikView(APIView):
     def delete(self, request, id):
         try:
 
@@ -502,7 +540,7 @@ class DeleteDataStrukturSekolahView(APIView):
                 }, status=status.HTTP_404_NOT_FOUND)
             
 
-            sekolah = StrukturSekolah.objects.filter(id=id).first()
+            sekolah = Akademik.objects.filter(id=id).first()
             if not sekolah:
                 return Response({
                     'error': 'not_found',

@@ -18,6 +18,8 @@ export const authOptions: NextAuthOptions = {
             loginPath = "login/admin";
           } else if (pathname.includes("/accounts/login/siswa")) {
             loginPath = "login/siswa";
+          } else if (pathname.includes("/accounts/login/guru")) {
+            loginPath = "login/guru";
           } else {
             throw new Error("Invalid login path");
           }
@@ -66,6 +68,20 @@ export const authOptions: NextAuthOptions = {
               message: user.message || "",
               role: "siswa",
             };
+          } else if (pathname.includes("/accounts/login/guru")) {
+            if (!user) {
+              throw new Error("Invalid teacher data or authorization failed");
+            }
+            return {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              access: user.access || "",
+              refresh: user.refresh || "",
+              redirect: user.redirect,
+              message: user.message || "",
+              posisi: user.posisi,
+            };
           }
           return null;
         } catch (error) {
@@ -85,6 +101,7 @@ export const authOptions: NextAuthOptions = {
         token.redirect = user.redirect;
         token.username = user.username;
         token.message = user.message;
+        token.posisi = user.posisi;
         token.exp = Date.now() / 1000 + 60 * 15;
       }
 
@@ -120,6 +137,7 @@ export const authOptions: NextAuthOptions = {
         redirect: typeof token.redirect === "string" ? token.redirect : "",
         username: typeof token.username === "string" ? token.username : "",
         message: typeof token.message === "string" ? token.message : "",
+        posisi: typeof token.posisi === "string" ? token.posisi : "",
       };
       return session;
     },

@@ -9,7 +9,9 @@ export const hiddenNavbar = () => {
     pathname.startsWith("/account") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/404") ||
-    pathname.startsWith("/e-learning")
+    pathname.startsWith("/e-learning") ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/akademik")
   );
 };
 

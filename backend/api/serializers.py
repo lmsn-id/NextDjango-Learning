@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import DataSiswa, StrukturSekolah
+from .models import DataSiswa, Akademik
 
 class AkunSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,9 +33,9 @@ class GetAllDataSiswaSerializer(serializers.ModelSerializer):
         
 
 
-class StrukturSekolahSerializer(serializers.ModelSerializer):
+class AkademikSerializer(serializers.ModelSerializer):
     class Meta:
-        model = StrukturSekolah
+        model = Akademik
         fields = ['id','Nip', 'Nuptk', 'Nama', 'Posisi', 'Kelas', 'Materi']
         extra_kwargs = {
             'id': {'read_only': True},
@@ -63,7 +63,7 @@ class StrukturSekolahSerializer(serializers.ModelSerializer):
         
         return data
 
-class GetAllStrukturSekolahSerializer(serializers.ModelSerializer):
+class GetAllAkademikSerializer(serializers.ModelSerializer):
     class Meta:
-        model = StrukturSekolah
+        model = Akademik
         fields = '__all__'

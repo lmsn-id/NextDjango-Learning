@@ -22,6 +22,7 @@ export default function Navbar() {
 
   const Activate = usePathname();
 
+  const Akademik = ["Kepala Sekolah", "Guru", "Staff", "Tata Usaha"];
   if (hiddenNavbar()) {
     return null;
   }
@@ -29,31 +30,44 @@ export default function Navbar() {
   const ComponentPlus = () => {
     if (session?.user?.is_superuser) {
       return (
-        <>
-          <li>
-            <Link
-              href="/admin"
-              className="block py-2 px-3 text-white rounded md:hover:text-black"
-            >
-              Admin
-            </Link>
-          </li>
-        </>
-      );
-    } else if (session?.user.role === "siswa") {
-      return (
-        <>
-          <li>
-            <Link
-              href="/e-learning"
-              className="block py-2 px-3 text-white rounded md:hover:text-black"
-            >
-              E-Learning
-            </Link>
-          </li>
-        </>
+        <li>
+          <Link
+            href="/admin"
+            className="block py-2 px-3 text-white rounded md:hover:text-black"
+          >
+            Admin
+          </Link>
+        </li>
       );
     }
+
+    if (session?.user?.role === "siswa") {
+      return (
+        <li>
+          <Link
+            href="/e-learning"
+            className="block py-2 px-3 text-white rounded md:hover:text-black"
+          >
+            E-Learning
+          </Link>
+        </li>
+      );
+    }
+
+    if (session?.user?.posisi && Akademik.includes(session.user.posisi)) {
+      return (
+        <li>
+          <Link
+            href="/akademik"
+            className="block py-2 px-3 text-white rounded md:hover:text-black"
+          >
+            Akademik
+          </Link>
+        </li>
+      );
+    }
+
+    return null;
   };
 
   return (

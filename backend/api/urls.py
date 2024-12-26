@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('auth/login/admin', views.LoginViewAdmin.as_view(), name='login'),
     path('auth/login/siswa', views.LoginViewSiswa.as_view(), name='login'),
+    path('auth/login/guru', views.LoginAkademikView.as_view(), name='login'),
     path('auth/refresh/', views.TokenRefreshView.as_view(), name='refresh'),
     path('auth/logout/', views.LogoutView.as_view(), name='logout'),
 #=====================================================================================
@@ -14,10 +15,10 @@ urlpatterns = [
 #=====================================================================================
     path('auth/GetDataElearning/<str:username>', views.GetAllDataElearningView.as_view(), name='dataElearning'),
 #=====================================================================================
-    path('auth/addSekolah/', views.AddStrukturSekolahView.as_view(), name='addSekolah'),
-    path('auth/GetAllStrukturSekolah', views.GetAllStrukturSekolahView.as_view(), name='dataSekolah'),
-    path('auth/UpdateDataSekolah/<str:id>', views.UpdateDataStrukturSekolahView.as_view(), name='getSekolah'),
-    path('auth/deleteDataSekolah/<str:id>/', views.DeleteDataStrukturSekolahView.as_view(), name='delete-sekolah'),
+    path('auth/AddDataAkademik/', views.AddDataAkademikView.as_view(), name='AddDataAkademik'),
+    path('auth/GetAllDataAkademik', views.GetAllDataAkademikView.as_view(), name='GetAllDataAkademik'),
+    path('auth/UpdateDataAkademik/<str:id>', views.UpdateDataAkademikView.as_view(), name='GetDataAkademik'),
+    path('auth/DeleteDataAkademik/<str:id>/', views.DeleteDataAkademikView.as_view(), name='DeleteDataAkademik'),
 
    
 

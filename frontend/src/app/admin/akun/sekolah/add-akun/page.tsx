@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { AddAkunStrukturSekolah } from "@/hook/usePost";
+import { AddDataAkademik } from "@/hook/usePost";
 
 export default function AddAkunSekolah() {
   const {
@@ -12,7 +12,7 @@ export default function AddAkunSekolah() {
     fields,
     append,
     posisi,
-  } = AddAkunStrukturSekolah();
+  } = AddDataAkademik();
 
   return (
     <div className="w-full h-full bg-white rounded-2xl shadow-md">

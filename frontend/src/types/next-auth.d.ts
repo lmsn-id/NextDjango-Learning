@@ -8,6 +8,7 @@ declare module "next-auth" {
     username?: string;
     redirect?: string;
     message?: string;
+    posisi?: string;
     is_superuser?: boolean;
   }
 
@@ -22,6 +23,7 @@ declare module "next-auth" {
       redirect?: string;
       message?: string;
       role?: string;
+      posisi?: string;
       is_superuser?: boolean;
     };
   }
