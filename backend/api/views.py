@@ -562,4 +562,29 @@ class DeleteDataAkademikView(APIView):
                 'details': str(e)
             })
         
+class GetUserAkademikView(APIView):
+      def get(self, request, username):
+        try:
+            akademik = Akademik.objects.filter(id=username).first()
+            if not akademik:
+                return Response({
+                    'error': 'not_found',
+                    'message': 'Data akademik tidak ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = GetAllAkademikSerializer(akademik)
+            return Response({
+                'message': 'Data Akademik ditemukan',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat mengambil data akademik',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    
         

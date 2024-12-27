@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { redirect } from "next/navigation";
+import SidebarAkademik from "@/Components/akademi/Sidebar";
 
 export const metadata = {
   title: "SMKN 5 || Akademik",
@@ -27,7 +28,9 @@ export default async function AkademikLayout({
 
   return (
     <>
-      <div className="w-full h-full flex">{children}</div>
+      <section className="flex">
+        <SidebarAkademik>{children}</SidebarAkademik>
+      </section>
     </>
   );
 }

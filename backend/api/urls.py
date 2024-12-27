@@ -19,7 +19,6 @@ urlpatterns = [
     path('auth/GetAllDataAkademik', views.GetAllDataAkademikView.as_view(), name='GetAllDataAkademik'),
     path('auth/UpdateDataAkademik/<str:id>', views.UpdateDataAkademikView.as_view(), name='GetDataAkademik'),
     path('auth/DeleteDataAkademik/<str:id>/', views.DeleteDataAkademikView.as_view(), name='DeleteDataAkademik'),
-
-   
+    path('auth/GetUserAkademik/<str:username>', views.GetUserAkademikView.as_view(), name='GetUserAkademik'),
 
 ]
