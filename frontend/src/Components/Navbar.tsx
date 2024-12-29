@@ -150,7 +150,7 @@ export default function Navbar() {
               initial={{ transform: "translateY(-100%)", opacity: 0 }}
               animate={
                 isOpen
-                  ? { transform: "translateY(40%)", opacity: 1 }
+                  ? { transform: "translateY(50%)", opacity: 1 }
                   : { transform: "translateY(-100%)", opacity: 0 }
               }
               transition={{

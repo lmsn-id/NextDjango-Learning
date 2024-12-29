@@ -2,6 +2,7 @@ import HomePage from "./Home/page";
 import Layanan from "./Home/View/Layanan";
 import Informasi from "./Home/View/Informasi";
 import Gallary from "./Home/View/Gallary";
+import ChatBoot from "@/Components/ChatBoot";
 
 export const metadata = {
   title: "SMKN 5 || Home",
@@ -15,6 +16,8 @@ export default function Home() {
         <Layanan />
         <Informasi />
         <Gallary />
+
+        <ChatBoot />
       </div>
     </>
   );

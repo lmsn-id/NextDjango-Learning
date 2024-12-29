@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { MdOutlineDashboard } from "react-icons/md";
 import { RiSettings4Line } from "react-icons/ri";
@@ -18,8 +19,9 @@ export default function SidebarAkademik({
 }: {
   children: React.ReactNode;
 }) {
+  const baseurl = () => "/akademik";
   const menus = [
-    { name: "Dashboard", link: "/", icon: MdOutlineDashboard },
+    { name: "Dashboard", link: `${baseurl()}/`, icon: MdOutlineDashboard },
     { name: "User", link: "/", icon: AiOutlineUser },
     { name: "Messages", link: "/", icon: FiMessageSquare },
     { name: "Analytics", link: "/", icon: TbReportAnalytics, margin: true },
@@ -33,7 +35,10 @@ export default function SidebarAkademik({
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownOpen2, setDropdownOpen2] = useState(false);
+  const dropdownRef2 = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,19 +50,46 @@ export default function SidebarAkademik({
       }
     };
 
+    const handleClickOutside2 = (event: MouseEvent) => {
+      if (
+        dropdownRef2.current &&
+        !dropdownRef2.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen2(false);
+      }
+    };
+
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
     window.addEventListener("resize", handleResize);
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside2);
     handleResize();
 
     return () => {
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside2);
     };
   }, []);
+
+  const isActive = (path: string) => {
+    if (path === `${baseurl()}/` && pathname === baseurl()) {
+      return true;
+    }
+    return path === pathname;
+  };
+
+  const handleDropdownClick2 = () => {
+    if (!open) {
+      setOpen(true);
+      setTimeout(() => setDropdownOpen2(true), 300); 
+    } else {
+      setDropdownOpen2(!dropdownOpen2);
+    }
+  };
 
   return (
     <>
@@ -72,52 +104,126 @@ export default function SidebarAkademik({
             : ""
         } transition-all duration-500 shadow-xl text-gray-600 p-2 md:p-4`}
       >
-        <div
-          style={{ transitionDelay: `300ms` }}
-          className={`whitespace-pre duration-500 flex flex-col items-center gap-5 ${
-            !open && "opacity-0 translate-x-28 overflow-hidden"
-          }`}
-        >
-          <Link href="/" className="flex items-center flex-col gap-2">
-            <Image
-              width={100}
-              height={100}
-              src="/LOGO-NEW-SMKN5.png"
-              className="w-10"
-              alt="Logo SMKN 5"
-            />
-            <h2>SMKN 5 Kab Tangerang</h2>
-          </Link>
-        </div>
-        <div className="mt-4 flex flex-col gap-4 relative">
-          {menus?.map((menu, i) => (
-            <Link
-              href={menu?.link}
-              key={i}
-              className={`${
-                menu?.margin && "mt-5"
-              } group flex items-center text-sm gap-3.5 font-medium p-2 hover:bg-gray-300 rounded-md`}
+        <div className="flex flex-col justify-between h-full">
+          <section>
+            <div
+              style={{ transitionDelay: `300ms` }}
+              className={`whitespace-pre duration-500 gap-5 ${
+                !open && "opacity-0 translate-x-28 overflow-hidden"
+              }`}
             >
-              <div>{React.createElement(menu?.icon, { size: "20" })}</div>
-              <h2
-                style={{
-                  transitionDelay: `${i + 3}00ms`,
-                }}
-                className={`whitespace-pre duration-500 ${
-                  !open && "opacity-0 translate-x-28 overflow-hidden"
-                }`}
+              <Link href="/" className={`flex items-center flex-col gap-2`}>
+                <Image
+                  width={100}
+                  height={100}
+                  src="/LOGO-NEW-SMKN5.png"
+                  className="w-10"
+                  alt="Logo SMKN 5"
+                />
+                <h2>SMKN 5 Kab Tangerang</h2>
+              </Link>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-4 relative">
+              {menus?.map((menu, i) => (
+                <Link
+                  href={menu.link}
+                  key={i}
+                  className={`${
+                    menu.margin && "mt-5"
+                  } group flex items-center text-sm gap-3.5 font-medium p-2 rounded-md ${
+                    isActive(menu.link)
+                      ? "bg-gray-300 text-gray-900"
+                      : "hover:bg-gray-300"
+                  }`}
+                >
+                  <div>{React.createElement(menu?.icon, { size: "20" })}</div>
+                  <h2
+                    style={{
+                      transitionDelay: `${i + 3}00ms`,
+                    }}
+                    className={`whitespace-pre duration-500 ${
+                      !open && "opacity-0 translate-x-28 overflow-hidden"
+                    }`}
+                  >
+                    {menu?.name}
+                  </h2>
+                  <h2
+                    className={`${
+                      open && "hidden"
+                    } absolute left-48 bg-white font-semibold whitespace-pre text-gray-900 rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit`}
+                  >
+                    {menu?.name}
+                  </h2>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <div
+            className={` ${isMobile ? "fixed left-0 w-full" : ""} bg-white`}
+            style={{ bottom: isMobile ? "0" : "auto" }}
+          >
+            <div
+              className={`flex flex-col items-start text-sm font-medium  hover:bg-gray-300 rounded-md cursor-pointer ${
+                open ? "gap-3.5 p-2" : "justify-center"
+              }`}
+            >
+              <div
+                className="flex justify-between gap-1 items-center w-full"
+                onClick={handleDropdownClick2}
               >
-                {menu?.name}
-              </h2>
-              <h2
-                className={`${
-                  open && "hidden"
-                } absolute left-48 bg-white font-semibold whitespace-pre text-gray-900 rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit`}
-              >
-                {menu?.name}
-              </h2>
-            </Link>
-          ))}
+                <div className="flex gap-3 items-center">
+                  <div className="bg-green-600 rounded-full p-2">
+                    <FaUserTie className="text-white" size={20} />
+                  </div>
+                  {open && (
+                    <div
+                      className={`whitespace-pre duration-500 ${
+                        !open && "opacity-0 translate-x-28 overflow-hidden"
+                      }`}
+                    >
+                      <h2 className="text-gray-900">{FormAkademik.Nama}</h2>
+                      <p>{FormAkademik.Posisi}</p>
+                    </div>
+                  )}
+                </div>
+
+                {open && (
+                  <IoIosArrowForward
+                    className={`${
+                      dropdownOpen2
+                        ? "rotate-90 duration-200"
+                        : "rotate-0 duration-200"
+                    }`}
+                    size={18}
+                  />
+                )}
+              </div>
+
+              {dropdownOpen2 && (
+                <div
+                  className={`flex flex-col mt-2 transition-transform duration-300 ${
+                    dropdownOpen2 ? "translate-x-0" : "translate-x-full"
+                  } w-full bg-white rounded shadow-md z-50`}
+                  ref={dropdownRef2}
+                >
+                  <ul className="text-sm text-gray-800 w-full">
+                    <li className="border-b hover:bg-gray-100">
+                      <Link
+                        href="/profile"
+                        className="block px-4 py-2 hover:bg-gray-400 font-semibold"
+                      >
+                        Profile
+                      </Link>
+                    </li>
+
+                    <LogoutButton className="w-full text-start px-4 py-2 hover:bg-gray-400 font-semibold" />
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </aside>
 
