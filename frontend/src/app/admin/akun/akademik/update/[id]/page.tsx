@@ -65,7 +65,7 @@ async function updateDataSekolah(id: string, data: SekolahFormData) {
   return await response.json();
 }
 
-export default function UpdateSekolah() {
+export default function UpdateAkademik() {
   const { register, handleSubmit, setValue, control, watch } =
     useForm<SekolahFormData>({
       defaultValues: {

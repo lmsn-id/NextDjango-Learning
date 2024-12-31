@@ -18,9 +18,11 @@ export default function NavbarAdmin() {
     "/admin/akun": "Akun",
     "/admin/akun/siswa": "Akun Siswa",
     "/admin/akun/siswa/add-siswa": "Add Siswa",
-    "/admin/akun/sekolah": "Akun Sekolah",
-    "/admin/akun/sekolah/add-akun": "Add Akun Sekolah",
-    "/admin/akun/sekolah/update/[id]": "Update Akun Sekolah",
+    "/admin/akun/akademik": "Akun Akademik",
+    "/admin/akun/akademik/add-akun": "Add Akun Akademik",
+    "/admin/chatbot/chat": "Chatbot ",
+    "/admin/chatbot/chat/add-chat": "Add Chatbot ",
+    "/admin/chatbot/cache": "Cache Chatbot ",
   };
 
   const currentText = pathToTextMap[pathname as string] || "";

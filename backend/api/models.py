@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class DataSiswa(models.Model):
     id = models.BigIntegerField( unique=True, blank=True, primary_key=True)
     Nis = models.CharField( unique=True, blank=True, max_length=15)
@@ -41,3 +40,14 @@ class Akademik(models.Model):
         if not self.id:
             self.id = int(self.Nip) if self.Nip else int(self.Nuptk)
         super().save(*args, **kwargs)
+
+class ChatBot(models.Model):
+    id = models.BigIntegerField( primary_key=True,)
+    Value = models.CharField(max_length=100)
+    Text = models.JSONField()
+
+
+class CacheChatBot(models.Model):
+    id = models.BigIntegerField(  primary_key=True)
+    User = models.CharField(max_length=50)
+    Text = models.JSONField()

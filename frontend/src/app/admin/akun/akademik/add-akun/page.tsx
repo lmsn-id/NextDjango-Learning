@@ -2,7 +2,7 @@
 import React from "react";
 import { AddDataAkademik } from "@/hook/usePost";
 
-export default function AddAkunSekolah() {
+export default function AddAkunAkademik() {
   const {
     register,
     handleSubmit,
@@ -19,7 +19,7 @@ export default function AddAkunSekolah() {
       <div className="p-6 max-h-full overflow-y-auto">
         <div className="w-full flex justify-center mb-4">
           <h1 className="text-gray-900 text-lg font-semibold">
-            Add Akun Sekolah
+            Add Akun Akademik
           </h1>
         </div>
         <form onSubmit={handleSubmit(onSubmit)}>

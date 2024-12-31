@@ -6,11 +6,13 @@ import ComponentIcon from "@/hook/icon";
 import LogoutButton from "../LogoutButton";
 
 export default function SidebarAdmin() {
-  const { FaTv, FaUser, FaSignInAlt, FaUserTie } = ComponentIcon.fa;
+  const { FaTv, FaUser, FaSignInAlt, FaUserTie, FaRobot } = ComponentIcon.fa;
+  const { IoMdChatbubbles } = ComponentIcon.io;
   const { PiStudentFill } = ComponentIcon.pi;
-  const { MdOutlineLastPage } = ComponentIcon.md;
+  const { MdOutlineLastPage, MdCached } = ComponentIcon.md;
   const pathname = usePathname();
   const [openAccount, setopenAccount] = useState(false);
+  const [openChatbot, setopenChatbot] = useState(false);
 
   const dropdownRef = useRef<HTMLUListElement>(null);
 
@@ -22,6 +24,7 @@ export default function SidebarAdmin() {
         !dropdownRef.current.contains(event.target)
       ) {
         setopenAccount(false);
+        setopenChatbot(false);
       }
     };
 
@@ -64,7 +67,7 @@ export default function SidebarAdmin() {
                   href="/admin"
                 >
                   <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-center xl:p-2.5">
-                    <FaTv className="text-blue-500 text-xl" />
+                    <FaTv className="text-blue-500 text-xl flex-shrink-0" />
                   </div>
                   Dashboard
                 </Link>
@@ -73,7 +76,7 @@ export default function SidebarAdmin() {
               <li className="mt-0.5 w-full">
                 <button
                   className={`py-3 text-lg ease-nav-brand flex items-center whitespace-nowrap rounded-lg ps-4 pe-2 font-semibold transition-colors hover:bg-gray-300 w-full ${
-                    isActive("/admin/account")
+                    isActive("/admin/akun")
                       ? "bg-gray-300 text-white"
                       : "bg-blue-500/13 text-slate-700"
                   }`}
@@ -82,7 +85,7 @@ export default function SidebarAdmin() {
                   <div className="flex justify-between w-full items-center">
                     <div className="flex items-center">
                       <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-center xl:p-2.5">
-                        <FaUser className="text-blue-500 text-xl" />
+                        <FaUser className="text-blue-500 text-xl flex-shrink-0" />
                       </div>
                       Account
                     </div>
@@ -111,7 +114,7 @@ export default function SidebarAdmin() {
                           href="/admin/akun/siswa"
                         >
                           <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-center xl:p-2.5">
-                            <PiStudentFill className="text-blue-500 text-xl" />
+                            <PiStudentFill className="text-blue-500 text-xl flex-shrink-0" />
                           </div>
                           Akun Siswa
                         </Link>
@@ -119,16 +122,81 @@ export default function SidebarAdmin() {
                       <li className="mt-0.5 w-full">
                         <Link
                           className={`py-3 text-lg ease-nav-brand flex items-center whitespace-nowrap rounded-lg px-4 font-semibold transition-colors hover:bg-gray-300 ${
-                            isActive("/admin/akun/sekolah")
+                            isActive("/admin/akun/akademik")
                               ? "bg-gray-300 text-white"
                               : "bg-blue-500/13 text-slate-700"
                           }`}
-                          href="/admin/akun/sekolah"
+                          href="/admin/akun/akademik"
                         >
                           <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-center xl:p-2.5">
-                            <FaUserTie className="text-blue-500 text-xl" />
+                            <FaUserTie className="text-blue-500 text-xl flex-shrink-0" />
                           </div>
-                          Akun Sekolah
+                          Akun Akademik
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </li>
+              <li className="mt-0.5 w-full">
+                <button
+                  className={`py-3 text-lg ease-nav-brand flex items-center whitespace-nowrap rounded-lg ps-4 pe-2 font-semibold transition-colors hover:bg-gray-300 w-full ${
+                    isActive("/admin/chatbot")
+                      ? "bg-gray-300 text-white"
+                      : "bg-blue-500/13 text-slate-700"
+                  }`}
+                  onClick={() => setopenChatbot(!openChatbot)}
+                >
+                  <div className="flex justify-between w-full items-center">
+                    <div className="flex items-center">
+                      <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-center xl:p-2.5">
+                        <FaRobot className="text-blue-500 text-xl flex-shrink-0" />
+                      </div>
+                      Chatbot
+                    </div>
+                    <MdOutlineLastPage
+                      className={`text-blue-500 text-2xl transform duration-300 ease-in-out ${
+                        openChatbot ? "rotate-90" : ""
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {openChatbot && (
+                  <div
+                    className={`transition-all snap-y bg-gray-200 rounded-lg mx-5 duration-500 ease-in-out overflow-hidden ${
+                      openChatbot ? "max-h-96" : "max-h-0"
+                    }`}
+                  >
+                    <ul className="flex flex-col pl-0 mb-0" ref={dropdownRef}>
+                      <li className="mt-0.5 w-full">
+                        <Link
+                          className={`py-3 text-lg ease-nav-brand flex items-center whitespace-nowrap rounded-lg px-4 font-semibold transition-colors hover:bg-gray-300 ${
+                            isActive("/admin/chatbot/chat")
+                              ? "bg-gray-300 text-white"
+                              : "bg-blue-500/13 text-slate-700"
+                          }`}
+                          href="/admin/chatbot/chat"
+                        >
+                          <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-center xl:p-2.5">
+                            <IoMdChatbubbles className="text-blue-500 text-xl flex-shrink-0" />
+                          </div>
+                          Chat
+                        </Link>
+                      </li>
+                      <li className="mt-0.5 w-full">
+                        <Link
+                          className={`py-3 text-lg ease-nav-brand flex items-center whitespace-nowrap rounded-lg px-4 font-semibold transition-colors hover:bg-gray-300 ${
+                            isActive("/admin/chatbot/cache")
+                              ? "bg-gray-300 text-white"
+                              : "bg-blue-500/13 text-slate-700"
+                          }`}
+                          href="/admin/chatbot/cache"
+                        >
+                          <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-center text-center xl:p-2.5">
+                            <MdCached className="text-blue-500 text-xl flex-shrink-0" />
+                          </div>
+                          Cahce Chat
                         </Link>
                       </li>
                     </ul>

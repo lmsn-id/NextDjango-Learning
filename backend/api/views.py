@@ -1,5 +1,5 @@
 from django.contrib.auth.hashers import make_password
-from .models import DataSiswa, Akademik
+from .models import DataSiswa, Akademik, ChatBot
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,8 +8,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth.models import User
 from datetime import datetime
-from .serializers import AkunSerializer, DataSiswaSerializer, GetAllDataSiswaSerializer, AkademikSerializer, GetAllAkademikSerializer
+from .serializers import AkunSerializer, DataSiswaSerializer, GetAllDataSiswaSerializer, AkademikSerializer, GetAllAkademikSerializer, ChatBotSerializer, GetAllChatBotSerializer
 import traceback
+import json
 
 
 
@@ -360,7 +361,7 @@ class GetAllDataElearningView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-#===============================================Struktur Sekolah===============================================
+#===============================================Struktur Akademik===============================================
 class AddDataAkademikView(APIView):
     def post(self, request):
         try:
@@ -414,7 +415,7 @@ class AddDataAkademikView(APIView):
                 sekolah_serializer.save()
                 return Response({
                     'message': 'Data berhasil disimpan',
-                    'redirect': '/admin/akun/sekolah',
+                    'redirect': '/admin/akun/akademik',
                 }, status=status.HTTP_201_CREATED)
             else:
                 return Response(sekolah_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -510,7 +511,7 @@ class UpdateDataAkademikView(APIView):
                 serializer.save()
                 return Response({
                     'message': 'Data sekolah berhasil diupdate',
-                    'redirect': '/admin/akun/sekolah',
+                    'redirect': '/admin/akun/akademik',
                     'data': serializer.data
                 }, status=status.HTTP_200_OK)
             else:
@@ -550,7 +551,7 @@ class DeleteDataAkademikView(APIView):
             sekolah.delete()
             return Response({
                 'message': 'Data sekolah berhasil dihapus',
-                'redirect': '/admin/akun/sekolah',
+                'redirect': '/admin/akun/akademik',
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -585,6 +586,52 @@ class GetUserAkademikView(APIView):
                 'message': 'Terjadi kesalahan saat mengambil data akademik',
                 'details': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
         
-    
+#===============================================Chatbot==================================================
+
+class AddChatView(APIView):
+    def clean_text(self, text):
+        if isinstance(text, str):
+            return text.replace("\n", " ")
+        return text
+
+    def post(self, request):
+        value = request.data.get('Value')
+        text = request.data.get('Text')
+
+        if not value or not text:
+            return Response({'error': 'Semua Data Harus Diisi'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+
+            if isinstance(text, str):
+                try:
+                    text = json.loads(text)  
+                except json.JSONDecodeError:
+                    pass  
+            
+            if isinstance(text, dict):
+                text = {k: self.clean_text(v) if isinstance(v, str) else v for k, v in text.items()}
+            elif isinstance(text, str):
+                text = self.clean_text(text)
+
+            chat = ChatBot.objects.create(Value=value, Text=text)
+            serializer = ChatBotSerializer(chat)
+
+            return Response({
+                'message': 'Data Berhasil Ditambahkan',
+                'data': serializer.data,
+                'redirect': '/admin/chatbot/chat',
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception error:", e)
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat menambahkan data chatbot',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         

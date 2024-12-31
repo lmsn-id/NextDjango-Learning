@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
@@ -11,6 +11,11 @@ interface FormValues {
   Posisi: string;
   Kelas: string;
   Materi: { id: string; value: string }[];
+}
+
+interface FormData {
+  Value: string;
+  Text: string;
 }
 
 export const AddAkunSiswa = () => {
@@ -174,5 +179,72 @@ export const AddDataAkademik = () => {
     fields,
     append,
     posisi,
+  };
+};
+
+export const AddChatChatbot = () => {
+  const { register, handleSubmit, reset, watch } = useForm<FormData>({
+    defaultValues: {
+      Value: "",
+      Text: "",
+    },
+  });
+  const router = useRouter();
+
+  const handleTextareaInput = () => {
+    const textarea = document.getElementById("TextChat") as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    const subscription = watch(() => handleTextareaInput());
+    return () => subscription.unsubscribe();
+  });
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      const session = await getSession();
+      if (!session || !session.accessToken) {
+        throw new Error(
+          "User is not authenticated or session is missing accessToken"
+        );
+      }
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/AddChat/`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        toast.success(result.message || "Chat Berhasil Ditambahkan", {
+          onClose: () => {
+            router.push(result.redirect);
+          },
+        });
+      } else {
+        toast.error(result.message || "Chat Gagal Ditambahkan");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Terjadi kesalahan. Silakan coba lagi.");
+    }
+  };
+
+  return {
+    register,
+    handleSubmit,
+    onSubmit,
+    reset,
+    handleTextareaInput,
   };
 };

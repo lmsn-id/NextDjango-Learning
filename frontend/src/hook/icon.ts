@@ -13,6 +13,7 @@ import * as IoIcons5 from "react-icons/io5";
 import * as CgIcons from "react-icons/cg";
 import * as HiIcons from "react-icons/hi";
 import * as PiIcons from "react-icons/pi";
+import * as GiIcons from "react-icons/gi";
 
 type IconSet = Record<string, React.ComponentType<React.ComponentProps<"svg">>>;
 const ComponentIcon: Record<string, IconSet> = {
@@ -31,6 +32,7 @@ const ComponentIcon: Record<string, IconSet> = {
   cg: CgIcons,
   hi: HiIcons,
   pi: PiIcons,
+  gi: GiIcons,
 };
 
 export default ComponentIcon;

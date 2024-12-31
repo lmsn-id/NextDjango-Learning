@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import DataSiswa, Akademik
+from .models import DataSiswa, Akademik, ChatBot
 
 class AkunSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,4 +66,14 @@ class AkademikSerializer(serializers.ModelSerializer):
 class GetAllAkademikSerializer(serializers.ModelSerializer):
     class Meta:
         model = Akademik
+        fields = '__all__'
+
+class ChatBotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatBot
+        fields = ["Value", "Text"]
+
+class GetAllChatBotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatBot
         fields = '__all__'

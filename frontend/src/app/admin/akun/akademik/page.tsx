@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { getSession } from "next-auth/react";
 import Swal from "sweetalert2";
 
-export default function SekolahPage() {
+export default function AkademikPage() {
   const {
     dataSekolah,
     posisiList,
@@ -81,7 +81,7 @@ export default function SekolahPage() {
         <div className="p-6">
           <div className="w-full flex justify-center mb-4">
             <h1 className="text-gray-900 text-lg font-semibold">
-              Tabel Struktur Sekolah
+              Tabel Akun Akademik
             </h1>
           </div>
           <div className="header">
