@@ -22,6 +22,9 @@ urlpatterns = [
     path('auth/GetUserAkademik/<str:username>', views.GetUserAkademikView.as_view(), name='GetUserAkademik'),
 #=====================================================================================
     path('auth/AddChat/', views.AddChatView.as_view(), name='AddChatChatBot'),
+    path('auth/GetAllChat/', views.GetAllChatView.as_view(), name='GetAllChat'),
+    path('auth/UpdateDataChat/<str:id>', views.UpdateChatView.as_view(), name='GetDataChat'),
+    path('auth/DeleteDataChat/<str:id>/', views.DeleteDataChat.as_view(), name='DeleteChat'),
 
 
 

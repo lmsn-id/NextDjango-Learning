@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import DataSiswa, Akademik, ChatBot
+import json
 
 class AkunSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,6 +75,11 @@ class ChatBotSerializer(serializers.ModelSerializer):
         fields = ["Value", "Text"]
 
 class GetAllChatBotSerializer(serializers.ModelSerializer):
+    Text = serializers.SerializerMethodField()
     class Meta:
         model = ChatBot
         fields = '__all__'
+
+    def get_Text(self, obj):
+        # Konversi JSONField menjadi string
+        return json.dumps(obj.Text) if isinstance(obj.Text, dict) else obj.Text

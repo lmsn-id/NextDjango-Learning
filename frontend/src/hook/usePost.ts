@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
@@ -183,7 +183,7 @@ export const AddDataAkademik = () => {
 };
 
 export const AddChatChatbot = () => {
-  const { register, handleSubmit, reset, watch } = useForm<FormData>({
+  const { register, handleSubmit, reset } = useForm<FormData>({
     defaultValues: {
       Value: "",
       Text: "",
@@ -191,18 +191,14 @@ export const AddChatChatbot = () => {
   });
   const router = useRouter();
 
-  const handleTextareaInput = () => {
+  const handleTextareaInput = (text: string) => {
     const textarea = document.getElementById("TextChat") as HTMLTextAreaElement;
     if (textarea) {
       textarea.style.height = "auto";
+      textarea.value = text;
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
   };
-
-  useEffect(() => {
-    const subscription = watch(() => handleTextareaInput());
-    return () => subscription.unsubscribe();
-  });
 
   const onSubmit = async (data: FormData) => {
     try {

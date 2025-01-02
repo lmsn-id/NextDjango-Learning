@@ -2,20 +2,15 @@
 import Link from "next/link";
 import { useGetDataAkademik } from "@/hook/useGet";
 import { usePathname, useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import { getSession } from "next-auth/react";
-import Swal from "sweetalert2";
 
 export default function AkademikPage() {
   const {
     dataSekolah,
     posisiList,
     kelasList,
-    posisi,
-    kelas,
     setPosisi,
     setKelas,
-    setRefreshKey,
+    handleDelete,
   } = useGetDataAkademik();
 
   const GetPage = usePathname();
@@ -25,54 +20,6 @@ export default function AkademikPage() {
   const handleEditClick = async (id: string) => {
     const url = `${BaseUrl}/update/${id}`;
     router.push(url);
-  };
-
-  const handleDelete = async (id: string, Nama: string, Posisi: string) => {
-    const session = await getSession();
-    if (!session || !session.accessToken) {
-      throw new Error(
-        "User is not authenticated or session is missing accessToken"
-      );
-    }
-
-    const result = await Swal.fire({
-      title: "Konfirmasi Hapus",
-      text: `Apakah Anda yakin ingin menghapus Data ${Posisi} dengan Nama ${Nama}?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/DeleteDataAkademik/${id}/`;
-        const response = await fetch(url, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.accessToken}`,
-          },
-        });
-
-        const success = await response.json();
-
-        if (response.ok) {
-          toast.success(success.message, {
-            onClose: () => {
-              setRefreshKey((prevKey) => prevKey + 1);
-            },
-          });
-        } else {
-          toast.error("Gagal menghapus struktur sekolah.");
-        }
-      } catch (error) {
-        console.error("Error deleting struktur sekolah:", error);
-        toast.error("Gagal menghapus struktur sekolah.");
-      }
-    }
   };
 
   return (
@@ -91,10 +38,13 @@ export default function AkademikPage() {
                   name="sortByPosisi"
                   id="sortByPosisi"
                   className="p-2 border rounded-lg bg-[#3a3086] text-white"
-                  value={posisi}
                   onChange={(e) => setPosisi(e.target.value)}
+                  defaultValue={""}
                 >
-                  <option value="">Sort By Posisi</option>
+                  <option value="" disabled>
+                    Sort By Posisi
+                  </option>
+                  <option value="">All</option>
                   {posisiList.map((item, index) => (
                     <option key={index} value={item}>
                       {item}
@@ -106,10 +56,13 @@ export default function AkademikPage() {
                   name="sortByKelas"
                   id="sortByKelas"
                   className="p-2 border rounded-lg bg-[#3a3086] text-white"
-                  value={kelas}
+                  defaultValue={""}
                   onChange={(e) => setKelas(e.target.value)}
                 >
-                  <option value="">Sort By Kelas</option>
+                  <option value="" disabled>
+                    Sort By Kelas
+                  </option>
+                  <option value="">All</option>
                   {kelasList
                     .filter((item) => item !== "")
                     .map((item, index) => (

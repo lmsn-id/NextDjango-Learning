@@ -13,6 +13,7 @@
     "make": "cd ../backend && ..\\env\\Scripts\\activate && python manage.py makemigrations"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.62.11",
     "concurrently": "^9.1.0",
     "framer-motion": "^11.14.4",
     "next": "15.1.0",

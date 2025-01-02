@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getSession, useSession } from "next-auth/react";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 interface SiswaAdmin {
   id: string;
@@ -17,6 +18,12 @@ interface StrukturSekolah {
   Nama: string;
   Posisi: string;
   Kelas: string;
+}
+
+interface DataChatbot {
+  id: string;
+  Value: string;
+  Text: string;
 }
 
 export const useGetDataSiswa = () => {
@@ -121,6 +128,53 @@ export const useGetDataSiswa = () => {
     fetchData();
   }, [jurusan, kelas, jurusanList.length, kelasList.length, refreshKey]);
 
+  const handleDelete = async (Nis: string, Nama: string) => {
+    const session = await getSession();
+    if (!session || !session.accessToken) {
+      throw new Error(
+        "User  is not authenticated or session is missing accessToken"
+      );
+    }
+
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: `Apakah Anda yakin ingin menghapus Data Siswa dengan Nis ${Nis} Nama ${Nama}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/deleteSiswa/${Nis}/`;
+        const response = await fetch(url, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        });
+
+        if (response.ok) {
+          toast.success("Data siswa berhasil dihapus", {
+            onClose: () => {
+              setRefreshKey((prevKey) => prevKey + 1);
+            },
+          });
+        } else {
+          const data = await response.json();
+          toast.error(data.error || "Gagal menghapus data siswa");
+        }
+      } catch (error) {
+        console.error("Error deleting data:", error);
+        toast.error("Terjadi kesalahan saat menghapus data siswa");
+      }
+    }
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = siswaData.slice(indexOfFirstItem, indexOfLastItem);
@@ -140,7 +194,7 @@ export const useGetDataSiswa = () => {
     setCurrentPage,
     currentItems,
     totalPages,
-    setRefreshKey,
+    handleDelete,
   };
 };
 
@@ -246,6 +300,54 @@ export const useGetDataAkademik = () => {
     fetchData();
   }, [posisi, kelas, posisiList.length, kelasList.length, refreshKey]);
 
+  const handleDelete = async (id: string, Nama: string, Posisi: string) => {
+    const session = await getSession();
+    if (!session || !session.accessToken) {
+      throw new Error(
+        "User is not authenticated or session is missing accessToken"
+      );
+    }
+
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: `Apakah Anda yakin ingin menghapus Data ${Posisi} dengan Nama ${Nama}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/DeleteDataAkademik/${id}/`;
+        const response = await fetch(url, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        });
+
+        const success = await response.json();
+
+        if (response.ok) {
+          toast.success(success.message, {
+            onClose: () => {
+              setRefreshKey((prevKey) => prevKey + 1);
+            },
+          });
+        } else {
+          toast.error("Gagal menghapus struktur sekolah.");
+        }
+      } catch (error) {
+        console.error("Error deleting struktur sekolah:", error);
+        toast.error("Gagal menghapus struktur sekolah.");
+      }
+    }
+  };
+
   return {
     dataSekolah,
     posisiList,
@@ -255,6 +357,7 @@ export const useGetDataAkademik = () => {
     setPosisi,
     setKelas,
     setRefreshKey,
+    handleDelete,
   };
 };
 
@@ -306,5 +409,118 @@ export const useGetUserAkademik = () => {
 
   return {
     FormAkademik,
+  };
+};
+
+export const GetAllDataChatbot = () => {
+  const [data, setData] = useState<DataChatbot[]>([]);
+  const [uniqueValues, setUniqueValues] = useState<string[]>([]);
+  const [filteredData, setFilteredData] = useState<DataChatbot[]>([]);
+
+  async function fetchData(): Promise<{ data: DataChatbot[] }> {
+    const session = await getSession();
+    if (!session || !session.accessToken) {
+      throw new Error(
+        "User is not authenticated or session is missing accessToken"
+      );
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/GetAllChat/`;
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch data");
+    }
+
+    return await response.json();
+  }
+
+  useEffect(() => {
+    async function fetchAllData() {
+      try {
+        const result = await fetchData();
+        setData(result.data);
+        setFilteredData(result.data);
+
+        const values = Array.from(
+          new Set(result.data.map((item: DataChatbot) => item.Value))
+        );
+        setUniqueValues(values);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchAllData();
+  }, []);
+
+  const handleFilter = (value: string) => {
+    if (value === "") {
+      setFilteredData(data);
+    } else {
+      setFilteredData(data.filter((item) => item.Value === value));
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const result = await Swal.fire({
+      title: "Konfirmasi Hapus",
+      text: `Apakah Anda yakin ingin menghapus Data Ini?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const session = await getSession();
+        if (!session || !session.accessToken) {
+          throw new Error(
+            "User is not authenticated or session is missing accessToken"
+          );
+        }
+
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/DeleteDataChat/${id}/`;
+        const response = await fetch(url, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        });
+
+        const success = await response.json();
+
+        if (response.ok) {
+          toast.success(success.message, {
+            onClose: () => {
+              const newFilteredData = data.filter((item) => item.id !== id);
+              setData(newFilteredData);
+              setFilteredData(newFilteredData);
+            },
+          });
+        } else {
+          toast.error("Gagal menghapus data chat.");
+        }
+      } catch (error) {
+        console.error("Error deleting data chat:", error);
+        toast.error("Gagal menghapus data chat.");
+      }
+    }
+  };
+
+  return {
+    data,
+    uniqueValues,
+    filteredData,
+    handleFilter,
+    handleDelete,
   };
 };

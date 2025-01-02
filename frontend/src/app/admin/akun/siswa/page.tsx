@@ -3,23 +3,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useGetDataSiswa } from "@/hook/useGet";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import { getSession } from "next-auth/react";
-import Swal from "sweetalert2";
 
 export default function SiswaPage() {
   const {
     jurusanList,
     kelasList,
-    jurusan,
-    kelas,
     currentPage,
     setJurusan,
     setKelas,
     setCurrentPage,
     currentItems,
     totalPages,
-    setRefreshKey,
+    handleDelete,
   } = useGetDataSiswa();
 
   const GetPage = usePathname();
@@ -29,53 +24,6 @@ export default function SiswaPage() {
   const handleEditClick = async (Nis: string) => {
     const url = `${BaseUrl}/update/${Nis}`;
     router.push(url);
-  };
-
-  const handleDelete = async (Nis: string, Nama: string) => {
-    const session = await getSession();
-    if (!session || !session.accessToken) {
-      throw new Error(
-        "User  is not authenticated or session is missing accessToken"
-      );
-    }
-
-    const result = await Swal.fire({
-      title: "Konfirmasi Hapus",
-      text: `Apakah Anda yakin ingin menghapus Data Siswa dengan Nis ${Nis} Nama ${Nama}?`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus!",
-      cancelButtonText: "Batal",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/deleteSiswa/${Nis}/`;
-        const response = await fetch(url, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.accessToken}`,
-          },
-        });
-
-        if (response.ok) {
-          toast.success("Data siswa berhasil dihapus", {
-            onClose: () => {
-              setRefreshKey((prevKey) => prevKey + 1);
-            },
-          });
-        } else {
-          const data = await response.json();
-          toast.error(data.error || "Gagal menghapus data siswa");
-        }
-      } catch (error) {
-        console.error("Error deleting data:", error);
-        toast.error("Terjadi kesalahan saat menghapus data siswa");
-      }
-    }
   };
 
   return (
@@ -93,10 +41,13 @@ export default function SiswaPage() {
                 name="sortByJurusan"
                 id="sortByJurusan"
                 className="p-2 border rounded-lg bg-[#3a3086] text-white"
-                value={jurusan}
+                defaultValue={""}
                 onChange={(e) => setJurusan(e.target.value)}
               >
-                <option value="">Sort By Jurusan</option>
+                <option value="" disabled>
+                  Sort By Jurusan
+                </option>
+                <option value="">All</option>
                 {jurusanList.map((jurusanItem, index) => (
                   <option key={index} value={jurusanItem}>
                     {jurusanItem}
@@ -108,10 +59,13 @@ export default function SiswaPage() {
                 name="sortByKelas"
                 id="sortByKelas"
                 className="p-2 border rounded-lg bg-[#3a3086] text-white"
-                value={kelas}
+                defaultValue={""}
                 onChange={(e) => setKelas(e.target.value)}
               >
-                <option value="">Sort By Kelas</option>
+                <option value="" disabled>
+                  Sort By Kelas
+                </option>
+                <option value="">All</option>
                 {kelasList.map((kelasItem, index) => (
                   <option key={index} value={kelasItem}>
                     {kelasItem}
@@ -129,7 +83,7 @@ export default function SiswaPage() {
             </div>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[410px] overflow-y-auto border-t border-gray-300">
           <table className="w-full border-collapse text-left text-sm text-gray-600">
             <thead className="bg-gray-100 text-gray-700 uppercase text-xs font-medium">
               <tr>
@@ -153,7 +107,7 @@ export default function SiswaPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="overflow-y-auto max-h-[400px]">
+            <tbody>
               {currentItems.map((siswa, index) => (
                 <tr key={index} className="border-b border-gray-300">
                   <td className="px-6 py-3 text-center font-semibold text-lg">

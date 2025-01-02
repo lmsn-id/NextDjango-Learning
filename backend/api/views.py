@@ -592,11 +592,6 @@ class GetUserAkademikView(APIView):
 #===============================================Chatbot==================================================
 
 class AddChatView(APIView):
-    def clean_text(self, text):
-        if isinstance(text, str):
-            return text.replace("\n", " ")
-        return text
-
     def post(self, request):
         value = request.data.get('Value')
         text = request.data.get('Text')
@@ -611,11 +606,6 @@ class AddChatView(APIView):
                     text = json.loads(text)  
                 except json.JSONDecodeError:
                     pass  
-            
-            if isinstance(text, dict):
-                text = {k: self.clean_text(v) if isinstance(v, str) else v for k, v in text.items()}
-            elif isinstance(text, str):
-                text = self.clean_text(text)
 
             chat = ChatBot.objects.create(Value=value, Text=text)
             serializer = ChatBotSerializer(chat)
@@ -634,4 +624,118 @@ class AddChatView(APIView):
                 'message': 'Terjadi kesalahan saat menambahkan data chatbot',
                 'details': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+   
+class GetAllChatView(APIView):
+    def get(self, request):
+        try:
+            chat_queryset = ChatBot.objects.all()
+            serializer = GetAllChatBotSerializer(chat_queryset, many=True)  
+
+            if not serializer.data:
+                return Response({
+                    'message': 'Data Chatbot Kosong',
+                }, status=status.HTTP_200_OK)
+
+            return Response({
+                'message': 'Data Chatbot ditemukan',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception error:", e)
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat mengambil data chatbot',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+
+class UpdateChatView(APIView):
+    def get(self, request, id):
+        try:
+            chat = ChatBot.objects.filter(id=id).first()
+            if not chat:
+                return Response({
+                    'error': 'Data Chatbot Tidak Ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = GetAllChatBotSerializer(chat)
+            return Response({
+                'message': 'Data Chatbot Ditemukan',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception error:", e)
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat mengambil data chatbot',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def put(self, request, id):
+        Text = request.data.get('Text')
+
+        if not Text:
+            return Response({
+                'error': 'Semua Data Harus Diisi'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            chat = ChatBot.objects.filter(id=id).first()
+
+            if not chat:
+                return Response({
+                    'error': 'Data Chatbot Tidak Ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            serializer = ChatBotSerializer(chat, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'message': 'Data Chatbot Berhasil Diperbarui',
+                    'redirect': '/admin/chatbot/chat',
+                    'data': serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                print("Serializer errors:", serializer.errors)
+                return Response({
+                    'error': 'validation_error',
+                    'message': 'Data tidak valid',
+                    'details': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception error:", e)
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat memperbarui data chatbot',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class DeleteDataChat (APIView):
+    def delete(self, request, id):
+        try:
+            chat = ChatBot.objects.filter(id=id).first()
+            if not chat:
+                return Response({
+                    'error': 'Data Chatbot Tidak Ditemukan'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            chat.delete()
+            return Response({
+                'message': 'Data Chatbot Berhasil Dihapus'
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception error:", e)
+            return Response({
+                'error': 'server_error',
+                'message': 'Terjadi kesalahan saat menghapus data chatbot',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
